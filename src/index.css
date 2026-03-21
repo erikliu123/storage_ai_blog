@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* === Dark Academic Theme === */
+    --background: 220 16% 8%;
+    --foreground: 210 20% 92%;
+
+    --surface: 220 14% 11%;
+    --surface-raised: 220 13% 14%;
+
+    --card: 220 14% 11%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 220 14% 11%;
+    --popover-foreground: 210 20% 92%;
+
+    /* Electric blue accent */
+    --primary: 213 90% 60%;
+    --primary-foreground: 220 16% 8%;
+    --primary-muted: 213 60% 20%;
+
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 210 20% 75%;
+
+    --muted: 220 13% 16%;
+    --muted-foreground: 215 15% 50%;
+
+    --accent: 213 90% 60%;
+    --accent-foreground: 220 16% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: 213 90% 60%;
+
+    --radius: 0.625rem;
+
+    /* Category tags */
+    --tag-ai: 265 80% 60%;
+    --tag-storage: 160 70% 45%;
+    --tag-wechat: 142 76% 36%;
+    --tag-ssd: 38 92% 55%;
+    --tag-fs: 196 80% 50%;
+
+    /* Shadows */
+    --shadow-card: 0 1px 3px hsl(220 16% 4% / 0.6), 0 1px 2px hsl(220 16% 4% / 0.4);
+    --shadow-card-hover: 0 8px 24px hsl(220 16% 4% / 0.5), 0 0 0 1px hsl(var(--primary) / 0.15);
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.25);
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(220 16% 8%) 0%, hsl(220 20% 10%) 50%, hsl(213 30% 10%) 100%);
+    --gradient-card-hover: linear-gradient(135deg, hsl(var(--surface)) 0%, hsl(var(--primary-muted) / 0.3) 100%);
+    --gradient-tag-ai: linear-gradient(90deg, hsl(265 80% 60% / 0.15), hsl(265 80% 60% / 0.05));
+    --gradient-tag-storage: linear-gradient(90deg, hsl(160 70% 45% / 0.15), hsl(160 70% 45% / 0.05));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(213 60% 15% / 0.3), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 80%, hsl(265 60% 12% / 0.2), transparent);
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .tag-ai {
+    background: hsl(var(--tag-ai) / 0.12);
+    color: hsl(var(--tag-ai));
+    border: 1px solid hsl(var(--tag-ai) / 0.25);
+  }
+  .tag-storage {
+    background: hsl(var(--tag-storage) / 0.12);
+    color: hsl(var(--tag-storage));
+    border: 1px solid hsl(var(--tag-storage) / 0.25);
+  }
+  .tag-wechat {
+    background: hsl(var(--tag-wechat) / 0.12);
+    color: hsl(var(--tag-wechat));
+    border: 1px solid hsl(var(--tag-wechat) / 0.25);
+  }
+  .tag-ssd {
+    background: hsl(var(--tag-ssd) / 0.12);
+    color: hsl(var(--tag-ssd));
+    border: 1px solid hsl(var(--tag-ssd) / 0.25);
+  }
+  .tag-fs {
+    background: hsl(var(--tag-fs) / 0.12);
+    color: hsl(var(--tag-fs));
+    border: 1px solid hsl(var(--tag-fs) / 0.25);
+  }
+  .card-paper {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-paper:hover {
+    box-shadow: var(--shadow-card-hover);
+    border-color: hsl(var(--primary) / 0.2);
+    background: var(--gradient-card-hover);
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--primary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .nav-link {
+    @apply text-sm font-medium transition-colors;
+    color: hsl(var(--muted-foreground));
+  }
+  .nav-link:hover {
+    color: hsl(var(--foreground));
+  }
+  .nav-link.active {
+    color: hsl(var(--primary));
+  }
+  .mono-label {
+    @apply font-mono text-xs;
+    color: hsl(var(--muted-foreground));
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: hsl(160 70% 45%);
+    border-radius: 50%;
+    box-shadow: 0 0 6px hsl(160 70% 45% / 0.6);
+  }
+  .scroll-area {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scroll-area::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scroll-area::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 2px;
+  }
+}
