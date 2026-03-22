@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpen, Rss, GitBranch, Search, Users, Award } from 'lucide-react'
+import { BookOpen, GitBranch, Search, Users, Award } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 

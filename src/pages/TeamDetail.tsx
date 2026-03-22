@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
-import { ExternalLink, MapPin, Globe, Users, BookOpen, GraduationCap, Award, TrendingUp } from 'lucide-react'
+import { ExternalLink, MapPin, Globe, Users, BookOpen, GraduationCap } from 'lucide-react'
 import { teams } from '@/data/teams'
 import { cn } from '@/lib/utils'
 

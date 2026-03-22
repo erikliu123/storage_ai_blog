@@ -2,7 +2,7 @@ import { papers } from '@/data/papers'
 import { formatDate, getSourceIcon } from '@/lib/utils'
 import { CategoryTag } from '@/components/ui/CategoryTag'
 import { Link } from 'react-router-dom'
-import { Clock, RefreshCw, GitCommit } from 'lucide-react'
+import { Clock } from 'lucide-react'
 
 // Group papers by date
 function groupByDate(items: typeof papers) {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Clock, ExternalLink } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import type { Paper } from '@/data/types'
 import { CategoryTag } from '@/components/ui/CategoryTag'
 import { formatDate, getSourceIcon } from '@/lib/utils'
