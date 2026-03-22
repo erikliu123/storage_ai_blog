@@ -62,7 +62,7 @@ export default function Home() {
       </div>
 
       {/* Conference Quick Links */}
-      <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="mb-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <Link to="/fast2026" className="group">
           <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
             <div className="flex items-center gap-2 mb-2">
@@ -109,6 +109,32 @@ export default function Home() {
               <span className="text-sm font-bold">ATC 2024</span>
             </div>
             <p className="text-xs text-muted-foreground">USENIX 技术会议</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>查看详情</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </div>
+        </Link>
+        <Link to="/asplos2025" className="group">
+          <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold">ASPLOS 2025</span>
+            </div>
+            <p className="text-xs text-muted-foreground">体系结构系统顶会</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>查看详情</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </div>
+        </Link>
+        <Link to="/sigmod2025" className="group">
+          <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold">SIGMOD 2025</span>
+            </div>
+            <p className="text-xs text-muted-foreground">数据管理顶会</p>
             <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
               <span>查看详情</span>
               <ArrowRight className="w-3 h-3" />

@@ -10,6 +10,8 @@ import Fast2026 from '@/pages/Fast2026'
 import FastArchive from '@/pages/FastArchive'
 import Osdi2025 from '@/pages/Osdi2025'
 import Atc2024 from '@/pages/Atc2024'
+import Asplos2025 from '@/pages/Asplos2025'
+import Sigmod2025 from '@/pages/Sigmod2025'
 import RaskDeepDive from '@/pages/RaskDeepDive'
 import DiscoGcDeepDive from '@/pages/DiscoGcDeepDive'
 import LinuxBugfix from '@/pages/LinuxBugfix'
@@ -30,6 +32,8 @@ function App() {
         <Route path="/fast-archive" element={<FastArchive />} />
         <Route path="/osdi2025" element={<Osdi2025 />} />
         <Route path="/atc2024" element={<Atc2024 />} />
+        <Route path="/asplos2025" element={<Asplos2025 />} />
+        <Route path="/sigmod2025" element={<Sigmod2025 />} />
         <Route path="/linux-bugfix" element={<LinuxBugfix />} />
         <Route path="/spdk" element={<SpdkUpdates />} />
         <Route path="/faults" element={<StorageFaults />} />
