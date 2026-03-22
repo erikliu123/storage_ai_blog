@@ -4,6 +4,7 @@ import Home from '@/pages/Home'
 import PaperDetail from '@/pages/PaperDetail'
 import Daily from '@/pages/Daily'
 import Archive from '@/pages/Archive'
+import Teams from '@/pages/Teams'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/paper/:id" element={<PaperDetail />} />
+        <Route path="/teams" element={<Teams />} />
         <Route path="/daily" element={<Daily />} />
         <Route path="/archive" element={<Archive />} />
       </Routes>
