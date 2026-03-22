@@ -1,4 +1,14 @@
-export type Category = 'AI' | 'Storage' | 'SSD' | 'FileSystem' | 'WeChat' | 'HBM'
+export type Category = 'AI' | 'Storage' | 'SSD' | 'FileSystem' | 'WeChat' | 'HBM' | 'FAST' | 'NAND' | 'SCM' | 'Memory' | 'NVMe' | 'SATA' | 'Computational Storage' | 'IO'
+
+export interface PaperImage {
+  url: string
+  caption?: string
+}
+
+export interface PaperSection {
+  title: string
+  content: string
+}
 
 export interface Paper {
   id: string
@@ -12,6 +22,9 @@ export interface Paper {
   abstract: string
   coreContributions: string[]
   archDiagram?: string
+  coverImage?: string
+  images?: PaperImage[]
+  sections?: PaperSection[]
   tags: string[]
   url: string
   source: 'dblp' | 'arxiv' | 'wechat'

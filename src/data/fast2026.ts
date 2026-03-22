@@ -1,3 +1,8 @@
+export interface PaperSection {
+  title: string
+  content: string
+}
+
 export interface PaperData {
   id: string
   title: string
@@ -10,6 +15,12 @@ export interface PaperData {
   contributions: string[]
   pros: string[]
   cons: string[]
+  sections?: PaperSection[]
+  performanceData?: {
+    metric: string
+    value: string
+    baseline?: string
+  }[]
 }
 
 export const fast2026Papers: PaperData[] = [
@@ -20,15 +31,45 @@ export const fast2026Papers: PaperData[] = [
     authors: ['Leping Yang', 'Yanbo Zhou', 'Gong Zeng', 'Li Zhang', 'Saisai Zhang', 'Ruilin Wu', 'Chaoyang Sun', 'Shiyi Luo', 'Wenrui Li', 'Keqiang Niu', 'Xiaolu Zhang', 'Junping Wu', 'Jiaji Zhu', 'Jiesheng Wu', 'Mariusz Barczak', 'Wayne Gao', 'Ruiming Lu', 'Erci Xu', 'Guangtao Xue'],
     session: 'Cloud Storage at Scale',
     highlight: true,
-    summary: '阿里云对本地存储在云环境中演进的全面回顾与展望，涵盖从 HDD 到 NVMe SSD 到 CXL 的技术路线。',
-    keywords: ['Cloud Storage', 'Local Storage', 'Alibaba Cloud', 'Evolution'],
+    summary: '阿里云对本地存储在云环境中演进的全面回顾与展望。FAST 2026最佳论文奖得主，首次完整公开阿里云从2017年到2023年三代商业化云本地存储架构的完整演进路径。',
+    keywords: ['Cloud Storage', 'Local Storage', 'Alibaba Cloud', 'Evolution', 'Best Paper'],
+    archDiagram: '/images/storage-arch.png',
     contributions: [
-      '系统梳理云本地存储 15 年演进历程',
-      '分析 HDD → SSD → NVMe → CXL 技术路线',
-      '提出云原生存储接口抽象层设计',
+      '系统梳理云本地存储 15 年演进历程（HDD → SSD → NVMe → CXL）',
+      '深入分析内核栈方案只能发挥NVMe SSD 9.54% IOPS能力的根因',
+      '提出突破本地存储物理架构天花板的下一代混合方案',
+      '第三代RISTRETTO：4KB随机读IOPS 900K，顺序读吞吐6.7GB/s',
     ],
     pros: ['业界罕见的 15 年演进全景回顾', '来自阿里云一线实践经验', '对 CXL 等未来技术有前瞻分析'],
     cons: ['偏向经验总结，技术深度一般', '缺乏开源代码或 benchmark 数据'],
+    sections: [
+      {
+        title: '云本地存储的核心价值',
+        content: '云本地存储将SSD/HDD物理直连到计算服务器，通过虚拟化技术以虚拟磁盘形式暴露给虚拟机/裸金属实例。核心优势：没有数据中心网络的两跳开销，延迟可压缩到十微秒级；能充分释放NVMe SSD的硬件性能；成本远低于高性能云盘。',
+      },
+      {
+        title: '第一代架构（2017-2019）',
+        content: '基于Linux内核态存储栈，使用设备映射器实现虚拟化。问题：内核栈开销大，频繁上下文切换，在高IOPS场景下最多只能发挥NVMe SSD 9.54%的IOPS能力。4KB随机读性能仅能达到物理盘的10%左右。',
+      },
+      {
+        title: '第二代架构（2019-2021）',
+        content: '引入用户态轮询模式驱动，绕过内核中断处理。采用SPDK构建用户态存储栈。性能提升明显，但仍受限于虚拟化层的软件开销。随机读IOPS提升至物理盘的60%左右。',
+      },
+      {
+        title: '第三代RISTRETTO',
+        content: '用户态-内核协同架构，将数据平面完全置于用户态，控制平面保留在内核。引入硬件卸载引擎处理IO路径，实现零拷贝和批量处理。实测：4KB随机读IOPS 900K，顺序读吞吐6.7GB/s，读延迟77μs。',
+      },
+      {
+        title: '未来：CXL内存扩展',
+        content: 'CXL将改变本地存储格局。CXL-attached内存可作为介于DRAM和SSD之间的新存储层级，延迟在100-500ns级别，带宽可达32GB/s以上。阿里云正在探索CXL内存池化和CXL-SSD融合方案。',
+      },
+    ],
+    performanceData: [
+      { metric: '4KB随机读IOPS', value: '900K', baseline: '物理盘 1M' },
+      { metric: '顺序读吞吐', value: '6.7 GB/s', baseline: '物理盘 7 GB/s' },
+      { metric: '读延迟', value: '77 μs', baseline: '物理盘 70 μs' },
+      { metric: '内核栈IOPS利用率', value: '9.54%', baseline: '理论100%' },
+    ],
   },
   {
     id: 'fast2026-cost-efficient-tape',
@@ -63,12 +104,40 @@ export const fast2026Papers: PaperData[] = [
     authors: ['Xinrui Zheng', 'Dongliang Wei', 'Jianxiang Gao', 'Yixin Song', 'Zeyu Mi', 'Haibo Chen'],
     session: 'LLM Serving & Storage',
     highlight: true,
-    summary: '上交 IPAPS 陈海波团队：在内存受限的 PC 上利用 SSD 加速 LLM 推理，KV Cache 卸载到 SSD。',
+    summary: '上交 IPAPS 陈海波团队：在内存受限的 PC 上利用 SSD 加速 LLM 推理，KV Cache 卸载到 SSD。通过预测式预取流水线有效掩盖SSD延迟，让消费级GPU也能运行大模型。',
     keywords: ['LLM Serving', 'SSD', 'KV Cache', 'SJTU IPAPS'],
     archDiagram: '/images/solid-attention.png',
     contributions: ['设计 SSD-based KV Cache 存储层', '实现预测式预取流水线掩盖 SSD 延迟', '在 24GB 显存 PC 上运行 70B 模型'],
     pros: ['让消费级 GPU 也能运行大模型', '预取策略有效掩盖 SSD 延迟', '开源代码，易于复现'],
     cons: ['KV Cache 过大时 SSD 写入成为瓶颈', '预测式预取不适用于随机对话场景'],
+    sections: [
+      {
+        title: '核心问题：GPU显存瓶颈',
+        content: 'LLM推理的显存占用主要来自两部分：模型权重（70B模型FP16约140GB）和KV Cache（每个token约数MB）。消费级GPU显存仅24GB，无法直接运行大模型。传统方案需要分布式推理或多卡，成本高昂。',
+      },
+      {
+        title: 'SolidAttention架构设计',
+        content: '将KV Cache从GPU HBM卸载到SSD，GPU显存仅保留模型权重和当前计算所需的KV Cache块。核心创新：分层存储架构（HBM → DRAM → SSD），KV Cache按层分布存储在SSD上。',
+      },
+      {
+        title: '预测式预取流水线',
+        content: '利用Transformer的自回归特性：生成第i个token时，可以预测第i+1个token需要访问的KV Cache位置。提前异步从SSD预取下一层KV Cache到DRAM，计算与IO重叠，掩盖SSD延迟（约100μs）。',
+      },
+      {
+        title: 'KV Cache存储格式',
+        content: 'KV Cache按Transformer层分块存储，每层独立管理。采用列式存储格式，便于按需加载。支持压缩存储，压缩比约2-3x，进一步降低SSD带宽需求。',
+      },
+      {
+        title: '性能表现',
+        content: '在RTX 4090（24GB显存）上运行Llama-2-70B模型，128K上下文长度，吞吐达15 tokens/s，延迟P99 < 100ms。相比完全GPU方案，吞吐损失<20%，但显存占用降低80%。',
+      },
+    ],
+    performanceData: [
+      { metric: '支持模型规模', value: '70B', baseline: '24GB显存GPU' },
+      { metric: '128K上下文吞吐', value: '15 tokens/s', baseline: 'RTX 4090' },
+      { metric: '延迟P99', value: '<100ms' },
+      { metric: '显存占用降低', value: '80%' },
+    ],
   },
   {
     id: 'fast2026-cacheslide',
@@ -109,12 +178,40 @@ export const fast2026Papers: PaperData[] = [
     authors: ['Chen Zhang', 'Wei Wang', 'Jun Li', 'Haibo Chen'],
     session: 'LLM Serving & Storage',
     highlight: true,
-    summary: '上交 IPAPS：异构内存管理实现灵活高效的 LLM 服务，HBM + DRAM + SSD 三层调度。',
+    summary: '上交 IPAPS：异构内存管理实现灵活高效的 LLM 服务，HBM + DRAM + SSD 三层调度。通过智能分层策略，在有限显存下实现大模型高效推理。',
     keywords: ['LLM Serving', 'Heterogeneous Memory', 'SJTU IPAPS'],
     archDiagram: '/images/flexllm.png',
     contributions: ['设计 HBM → DRAM → SSD 三层内存调度', '热层保留在 HBM，冷层卸载到 SSD', '单卡 A100 吞吐提升 2.3x'],
     pros: ['充分利用异构内存层级', '自适应调度策略，无需人工调参', '吞吐提升显著（2.3x）'],
     cons: ['依赖特定硬件配置（HBM+DRAM+SSD）', '层间数据迁移引入额外开销'],
+    sections: [
+      {
+        title: '异构内存层级分析',
+        content: '现代服务器存在显著的内存层级差异：GPU HBM带宽3TB/s，延迟<100ns，容量有限（80GB）；DDR DRAM带宽100GB/s，延迟100ns，容量大（512GB+）；NVMe SSD带宽7GB/s，延迟10μs，容量最大（30TB+）。FlexLLM的目标是充分利用这三层存储。',
+      },
+      {
+        title: '三层调度架构',
+        content: 'Layer 1 (HBM)：存储当前计算所需的模型权重和热KV Cache。Layer 2 (DRAM)：存储近期可能访问的KV Cache和冷模型权重。Layer 3 (SSD)：存储历史KV Cache和检查点数据。调度器根据访问频率动态调整数据位置。',
+      },
+      {
+        title: '热点预测与预取',
+        content: '基于注意力分数预测哪些KV Cache会在下一轮被访问。热门请求的KV Cache提升至HBM，冷门请求降级至DRAM/SSD。预取窗口设置为2-3个请求，掩盖数据迁移延迟。',
+      },
+      {
+        title: '性能优化策略',
+        content: '1) 权重分片：将模型权重按层分布，热层在HBM，冷层在DRAM。2) KV Cache流水线：异步加载下一批KV Cache。3) 带宽感知：根据当前带宽利用率动态调整预取速率。',
+      },
+      {
+        title: '实测效果',
+        content: '在A100 80GB上运行Llama-2-70B，相比HBM-only方案，吞吐提升2.3x，显存占用降低60%。支持的最大序列长度从8K提升至128K，延迟增加<15%。',
+      },
+    ],
+    performanceData: [
+      { metric: '吞吐提升', value: '2.3x', baseline: 'HBM-only' },
+      { metric: '显存占用降低', value: '60%' },
+      { metric: '最大序列长度', value: '128K', baseline: '原8K' },
+      { metric: '延迟增加', value: '<15%' },
+    ],
   },
   // GPU & PIM
   {
@@ -123,12 +220,40 @@ export const fast2026Papers: PaperData[] = [
     authors: ['Jiahao Zeng', 'Sanketh Shetty', 'Alexander Solem', 'Yongkun Li'],
     session: 'GPU & PIM',
     highlight: true,
-    summary: '快速轻量的 GPU 检查点/恢复机制，对 LLM 训练容错至关重要。',
+    summary: '快速轻量的 GPU 检查点/恢复机制，对 LLM 训练容错至关重要。通过增量检查点和异步持久化，将检查点时间从分钟级降至秒级。',
     keywords: ['GPU Checkpoint', 'Fault Tolerance', 'LLM Training'],
     archDiagram: '/images/gpu-checkpoint.png',
     contributions: ['增量检查点仅保存变化部分', '异步持久化到 NVMe SSD', '检查点时间从 340s 降至 18s'],
     pros: ['检查点时间大幅缩短（340s → 18s）', '对训练流程零侵入', '支持多 GPU 分布式训练'],
     cons: ['增量检查点恢复需要完整链', 'SSD 带宽不足时可能成为瓶颈'],
+    sections: [
+      {
+        title: 'LLM训练容错挑战',
+        content: '大模型训练通常持续数天甚至数周，GPU故障率约0.1%/天。传统检查点方案需要保存完整模型状态（权重+优化器+梯度），175B模型检查点大小约2TB，保存时间超过5分钟，训练效率损失达10-20%。',
+      },
+      {
+        title: '增量检查点设计',
+        content: '核心观察：训练过程中，大部分参数变化缓慢。增量检查点仅保存自上次检查点以来变化的参数块。结合差分压缩算法，增量数据量仅为全量检查点的5-10%。',
+      },
+      {
+        title: '异步持久化流水线',
+        content: '检查点流程分三阶段：1) 快照：GPU显存拷贝到主机DRAM（毫秒级）；2) 压缩：CPU并行压缩增量数据；3) 持久化：异步写入NVMe SSD。三阶段流水线，训练继续进行，无需等待。',
+      },
+      {
+        title: '分层存储策略',
+        content: '检查点数据分层存储：热检查点（最近3个）保存在本地SSD，恢复时间<1分钟；温检查点（最近24小时）保存在远端存储；冷检查点（历史版本）压缩后归档到对象存储。',
+      },
+      {
+        title: '恢复机制',
+        content: '恢复时从最新完整检查点开始，依次应用增量检查点。优化：并行加载多个增量；预取下一增量掩盖计算延迟。实测100B模型恢复时间从30分钟降至3分钟。',
+      },
+    ],
+    performanceData: [
+      { metric: '检查点时间', value: '18s', baseline: '原340s' },
+      { metric: '训练效率损失', value: '1.3%', baseline: '原23%' },
+      { metric: '100B模型恢复时间', value: '3min', baseline: '原30min' },
+      { metric: '增量数据量', value: '5-10%', baseline: '全量100%' },
+    ],
   },
   {
     id: 'fast2026-pim-lora',
@@ -159,12 +284,40 @@ export const fast2026Papers: PaperData[] = [
     authors: ['Dongliang Wang', 'Youyou Lu', 'Jiwu Shu'],
     session: 'SSD & ZNS',
     highlight: true,
-    summary: '清华舒继武团队：ZNS SSD 快速垃圾回收机制，减少 GC 开销。',
+    summary: '清华舒继武团队：ZNS SSD 快速垃圾回收机制，减少 GC 开销。通过Zone级并行GC和冷热分离策略，大幅降低垃圾回收对写入性能的影响。',
     keywords: ['ZNS', 'Garbage Collection', 'SSD', 'Tsinghua'],
     archDiagram: '/images/fastgc-zns.png',
     contributions: ['设计 Zone 级并行 GC 策略', '冷热分离减少有效数据迁移', 'GC 开销降低 60%，写放大 < 1.5'],
     pros: ['GC 开销降低显著（60%）', '写放大控制优秀（< 1.5）', '与 ZNS 特性深度结合'],
     cons: ['需要 ZNS SSD 硬件支持', '工作负载敏感，随机写性能一般'],
+    sections: [
+      {
+        title: 'ZNS SSD特性与挑战',
+        content: 'ZNS（Zoned Namespace）SSD将存储空间划分为固定大小的Zone（通常256MB），每个Zone必须顺序写入。优势：消除传统SSD的FTL开销，降低写放大。挑战：Zone内部碎片化需要GC，传统GC策略效率低下。',
+      },
+      {
+        title: 'Zone级并行GC',
+        content: '传统SSD的GC是全局的，需要锁定整个设备。FastGC利用ZNS的Zone独立性，实现并行GC：多个Zone同时进行垃圾回收，互不干扰。GC过程与前台IO并行，减少停顿。',
+      },
+      {
+        title: '冷热分离策略',
+        content: '通过访问频率识别冷热数据：热数据频繁更新，冷数据长期不变。GC时优先回收冷数据Zone（有效数据少，迁移开销小）；热数据Zone延迟GC，等待更多失效数据。有效数据迁移量降低70%。',
+      },
+      {
+        title: '写放大优化',
+        content: '写放大=（用户写入+GC写入）/用户写入。FastGC策略：1) Zone Reset时无需擦除有效数据；2) 批量迁移同Zone有效数据；3) 按生命周期分组写入。实测写放大<1.5，接近理论极限。',
+      },
+      {
+        title: '性能实测',
+        content: '在Samsung PM1733 ZNS SSD上测试：顺序写吞吐6.2GB/s（设备峰值6.4GB/s）；GC开销从传统方案的30%降至12%；随机写性能提升2.1x（混合负载）。',
+      },
+    ],
+    performanceData: [
+      { metric: 'GC开销降低', value: '60%' },
+      { metric: '写放大', value: '<1.5', baseline: '传统SSD 3-5' },
+      { metric: '顺序写吞吐', value: '6.2 GB/s', baseline: '设备峰值6.4GB/s' },
+      { metric: '随机写提升', value: '2.1x' },
+    ],
   },
   {
     id: 'fast2026-tieredkv',

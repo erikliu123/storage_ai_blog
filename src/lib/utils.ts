@@ -14,6 +14,14 @@ export function getCategoryTagClass(cat: Category): string {
     SSD: 'tag-ssd',
     FileSystem: 'tag-fs',
     HBM: 'tag-ai',
+    FAST: 'tag-ai',
+    NAND: 'tag-ssd',
+    SCM: 'tag-storage',
+    Memory: 'tag-ai',
+    NVMe: 'tag-ssd',
+    SATA: 'tag-ssd',
+    'Computational Storage': 'tag-storage',
+    IO: 'tag-storage',
   }
   return map[cat] ?? 'tag-storage'
 }
@@ -26,6 +34,14 @@ export function getCategoryLabel(cat: Category): string {
     SSD: 'SSD',
     FileSystem: '文件系统',
     HBM: 'HBM',
+    FAST: 'FAST',
+    NAND: 'NAND',
+    SCM: 'SCM',
+    Memory: '内存',
+    NVMe: 'NVMe',
+    SATA: 'SATA',
+    'Computational Storage': '计算存储',
+    IO: 'IO',
   }
   return map[cat] ?? cat
 }

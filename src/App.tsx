@@ -7,6 +7,7 @@ import Archive from '@/pages/Archive'
 import Teams from '@/pages/Teams'
 import TeamDetail from '@/pages/TeamDetail'
 import Fast2026 from '@/pages/Fast2026'
+import FastArchive from '@/pages/FastArchive'
 import Osdi2025 from '@/pages/Osdi2025'
 import Atc2024 from '@/pages/Atc2024'
 import RaskDeepDive from '@/pages/RaskDeepDive'
@@ -26,6 +27,7 @@ function App() {
         <Route path="/deep-dive/rask" element={<RaskDeepDive />} />
         <Route path="/deep-dive/discogc" element={<DiscoGcDeepDive />} />
         <Route path="/fast2026" element={<Fast2026 />} />
+        <Route path="/fast-archive" element={<FastArchive />} />
         <Route path="/osdi2025" element={<Osdi2025 />} />
         <Route path="/atc2024" element={<Atc2024 />} />
         <Route path="/linux-bugfix" element={<LinuxBugfix />} />

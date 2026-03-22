@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpen, GitBranch, Search, Users, Award, Bug, Zap, AlertOctagon, ChevronDown, Database } from 'lucide-react'
+import { BookOpen, GitBranch, Search, Users, Award, Bug, Zap, AlertOctagon, ChevronDown, Database, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useRef, useEffect } from 'react'
 
 const navItems = [
   { href: '/', label: '论文', icon: BookOpen },
-  { href: '/fast2026', label: 'FAST', icon: Award },
+  { href: '/fast2026', label: 'FAST 2026', icon: Award },
+  { href: '/fast-archive', label: 'FAST 历年', icon: Clock },
   { href: '/osdi2025', label: 'OSDI', icon: Award },
   { href: '/atc2024', label: 'ATC', icon: Award },
 ]

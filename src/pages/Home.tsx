@@ -4,7 +4,7 @@ import { papers } from '@/data/papers'
 import { PaperCard } from '@/components/PaperCard'
 import type { Category } from '@/data/types'
 import { getCategoryLabel } from '@/lib/utils'
-import { Filter, BookOpen, ArrowRight } from 'lucide-react'
+import { Filter, BookOpen, ArrowRight, Award, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const CATEGORIES: (Category | 'All')[] = ['All', 'AI', 'Storage', 'SSD', 'FileSystem', 'HBM', 'WeChat']
@@ -59,6 +59,62 @@ export default function Home() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Conference Quick Links */}
+      <div className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Link to="/fast2026" className="group">
+          <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold">FAST 2026</span>
+            </div>
+            <p className="text-xs text-muted-foreground">存储顶会最新论文</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>查看详情</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </div>
+        </Link>
+        <Link to="/fast-archive" className="group">
+          <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold">FAST 历年</span>
+            </div>
+            <p className="text-xs text-muted-foreground">2022-2025 论文解读</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>查看详情</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </div>
+        </Link>
+        <Link to="/osdi2025" className="group">
+          <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold">OSDI 2025</span>
+            </div>
+            <p className="text-xs text-muted-foreground">系统顶会精选</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>查看详情</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </div>
+        </Link>
+        <Link to="/atc2024" className="group">
+          <div className="card-paper rounded-xl p-4 hover:ring-2 hover:ring-primary/30 transition-all duration-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Award className="w-4 h-4 text-primary" />
+              <span className="text-sm font-bold">ATC 2024</span>
+            </div>
+            <p className="text-xs text-muted-foreground">USENIX 技术会议</p>
+            <div className="flex items-center gap-1 mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+              <span>查看详情</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Featured Deep Dives */}
