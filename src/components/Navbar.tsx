@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpen, GitBranch, Search, Users, Award, Bug, Zap, AlertOctagon, ChevronDown } from 'lucide-react'
+import { BookOpen, GitBranch, Search, Users, Award, Bug, Zap, AlertOctagon, ChevronDown, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useRef, useEffect } from 'react'
 
@@ -11,6 +11,7 @@ const navItems = [
 ]
 
 const moreItems = [
+  { href: '/opensource', label: '开源存储库', icon: Database },
   { href: '/linux-bugfix', label: 'Linux Bugfix', icon: Bug },
   { href: '/spdk', label: 'SPDK 更新', icon: Zap },
   { href: '/faults', label: '存储故障', icon: AlertOctagon },

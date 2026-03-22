@@ -13,6 +13,7 @@ import RaskDeepDive from '@/pages/RaskDeepDive'
 import LinuxBugfix from '@/pages/LinuxBugfix'
 import SpdkUpdates from '@/pages/SpdkUpdates'
 import StorageFaults from '@/pages/StorageFaults'
+import OpenSourceProjects from '@/pages/OpenSourceProjects'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/linux-bugfix" element={<LinuxBugfix />} />
         <Route path="/spdk" element={<SpdkUpdates />} />
         <Route path="/faults" element={<StorageFaults />} />
+        <Route path="/opensource" element={<OpenSourceProjects />} />
         <Route path="/teams" element={<Teams />} />
         <Route path="/teams/:id" element={<TeamDetail />} />
         <Route path="/daily" element={<Daily />} />
