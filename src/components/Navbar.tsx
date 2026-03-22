@@ -1,14 +1,19 @@
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpen, GitBranch, Search, Users, Award, Bug } from 'lucide-react'
+import { BookOpen, GitBranch, Search, Users, Award, Bug, Zap, AlertOctagon, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 const navItems = [
-  { href: '/', label: '论文列表', icon: BookOpen },
-  { href: '/fast2026', label: 'FAST 2026', icon: Award },
-  { href: '/osdi2025', label: 'OSDI 2025', icon: Award },
-  { href: '/atc2024', label: 'ATC 2024', icon: Award },
+  { href: '/', label: '论文', icon: BookOpen },
+  { href: '/fast2026', label: 'FAST', icon: Award },
+  { href: '/osdi2025', label: 'OSDI', icon: Award },
+  { href: '/atc2024', label: 'ATC', icon: Award },
+]
+
+const moreItems = [
   { href: '/linux-bugfix', label: 'Linux Bugfix', icon: Bug },
+  { href: '/spdk', label: 'SPDK 更新', icon: Zap },
+  { href: '/faults', label: '存储故障', icon: AlertOctagon },
   { href: '/teams', label: '研究团队', icon: Users },
   { href: '/archive', label: 'Git 归档', icon: GitBranch },
 ]
@@ -16,6 +21,21 @@ const navItems = [
 export function Navbar() {
   const location = useLocation()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef<HTMLDivElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
+        setMoreOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const isMoreActive = moreItems.some(item => location.pathname === item.href)
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
@@ -51,6 +71,46 @@ export function Navbar() {
               </Link>
             )
           })}
+
+          {/* More dropdown */}
+          <div className="relative" ref={moreRef}>
+            <button
+              onClick={() => setMoreOpen(!moreOpen)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150',
+                isMoreActive
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-surface'
+              )}
+            >
+              更多
+              <ChevronDown className={cn('w-3.5 h-3.5 transition-transform', moreOpen && 'rotate-180')} />
+            </button>
+
+            {moreOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-lg shadow-lg overflow-hidden z-50">
+                {moreItems.map(item => {
+                  const isActive = location.pathname === item.href
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      onClick={() => setMoreOpen(false)}
+                      className={cn(
+                        'flex items-center gap-2 px-3 py-2 text-sm transition-colors',
+                        isActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-surface-raised'
+                      )}
+                    >
+                      <item.icon className="w-3.5 h-3.5" />
+                      {item.label}
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Search */}
