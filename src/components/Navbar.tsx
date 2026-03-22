@@ -14,6 +14,8 @@ const navItems = [
 const moreItems = [
   { href: '/asplos2025', label: 'ASPLOS', icon: Award },
   { href: '/sigmod2025', label: 'SIGMOD', icon: Award },
+  { href: '/distributed-storage', label: '分布式存储', icon: Database },
+  { href: '/rocksdb-special', label: 'RocksDB 专题', icon: Database },
   { href: '/opensource', label: '开源存储库', icon: Database },
   { href: '/linux-bugfix', label: 'Linux Bugfix', icon: Bug },
   { href: '/spdk', label: 'SPDK 更新', icon: Zap },

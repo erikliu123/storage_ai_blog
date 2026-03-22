@@ -18,6 +18,8 @@ import LinuxBugfix from '@/pages/LinuxBugfix'
 import SpdkUpdates from '@/pages/SpdkUpdates'
 import StorageFaults from '@/pages/StorageFaults'
 import OpenSourceProjects from '@/pages/OpenSourceProjects'
+import DistributedStorageComparison from '@/pages/DistributedStorageComparison'
+import RocksDBSpecial from '@/pages/RocksDBSpecial'
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
         <Route path="/atc2024" element={<Atc2024 />} />
         <Route path="/asplos2025" element={<Asplos2025 />} />
         <Route path="/sigmod2025" element={<Sigmod2025 />} />
+        <Route path="/distributed-storage" element={<DistributedStorageComparison />} />
+        <Route path="/rocksdb-special" element={<RocksDBSpecial />} />
         <Route path="/linux-bugfix" element={<LinuxBugfix />} />
         <Route path="/spdk" element={<SpdkUpdates />} />
         <Route path="/faults" element={<StorageFaults />} />
