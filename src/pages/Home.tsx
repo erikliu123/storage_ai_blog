@@ -61,44 +61,83 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Featured Deep Dive - RASK */}
-      <div className="mb-8">
+      {/* Featured Deep Dives */}
+      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* RASK Deep Dive */}
         <Link to="/deep-dive/rask" className="block group">
-          <div className="card-paper rounded-2xl overflow-hidden ring-1 ring-primary/20 hover:ring-primary/40 transition-all duration-300">
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-1/3 h-40 md:h-auto relative overflow-hidden">
-                <img
-                  src="/images/rask-arch.png"
-                  alt="RASK 架构图"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-md font-mono">
-                    深度解读
-                  </span>
-                </div>
+          <div className="card-paper rounded-2xl overflow-hidden ring-1 ring-primary/20 hover:ring-primary/40 transition-all duration-300 h-full">
+            <div className="h-36 relative overflow-hidden">
+              <img
+                src="/images/rask-arch.png"
+                alt="RASK 架构图"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute top-3 left-3">
+                <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-md font-mono">
+                  深度解读
+                </span>
               </div>
-              <div className="flex-1 p-5 md:p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="tag-ai text-xs font-mono px-2 py-0.5 rounded">FAST 2026</span>
-                  <span className="tag-storage text-xs font-mono px-2 py-0.5 rounded">索引结构</span>
-                </div>
-                <h2 className="text-lg md:text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                  "Range as a Key" is the Key!
-                </h2>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                  Fast and Compact Cloud Block Store Index with RASK — 通过范围树和合并策略实现 80% 空间节省、50% 延迟降低
-                </p>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <BookOpen className="w-3.5 h-3.5" />
-                    15 分钟深度阅读
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <ArrowRight className="w-3.5 h-3.5" />
-                    查看完整解读
-                  </span>
-                </div>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="tag-ai text-xs font-mono px-2 py-0.5 rounded">FAST 2026</span>
+                <span className="tag-storage text-xs font-mono px-2 py-0.5 rounded">索引结构</span>
+              </div>
+              <h2 className="text-base font-bold mb-1.5 group-hover:text-primary transition-colors line-clamp-1">
+                "Range as a Key" is the Key!
+              </h2>
+              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                RASK 通过范围树和合并策略实现 80% 空间节省、50% 延迟降低
+              </p>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3" />
+                  15 分钟
+                </span>
+                <span className="flex items-center gap-1">
+                  <ArrowRight className="w-3 h-3" />
+                  查看解读
+                </span>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* DisCoGC Deep Dive */}
+        <Link to="/deep-dive/discogc" className="block group">
+          <div className="card-paper rounded-2xl overflow-hidden ring-1 ring-green-500/20 hover:ring-green-500/40 transition-all duration-300 h-full">
+            <div className="h-36 relative overflow-hidden">
+              <img
+                src="/images/discogc-arch.png"
+                alt="DisCoGC 架构图"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute top-3 left-3">
+                <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md font-mono">
+                  深度解读
+                </span>
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="tag-ai text-xs font-mono px-2 py-0.5 rounded">FAST 2026</span>
+                <span className="bg-purple-500/20 text-purple-400 text-xs font-mono px-2 py-0.5 rounded border border-purple-500/30">GC 优化</span>
+              </div>
+              <h2 className="text-base font-bold mb-1.5 group-hover:text-green-400 transition-colors line-clamp-1">
+                Discard-Based Garbage Collection
+              </h2>
+              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                字节跳动分布式存储 GC 优化，TCO 降低 20%，零数据移动回收空间
+              </p>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3" />
+                  12 分钟
+                </span>
+                <span className="flex items-center gap-1">
+                  <ArrowRight className="w-3 h-3" />
+                  查看解读
+                </span>
               </div>
             </div>
           </div>
