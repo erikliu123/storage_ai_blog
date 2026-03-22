@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { papers } from '@/data/papers'
 import { PaperCard } from '@/components/PaperCard'
 import type { Category } from '@/data/types'
 import { getCategoryLabel } from '@/lib/utils'
-import { Filter } from 'lucide-react'
+import { Filter, BookOpen, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const CATEGORIES: (Category | 'All')[] = ['All', 'AI', 'Storage', 'SSD', 'FileSystem', 'HBM', 'WeChat']
@@ -58,6 +59,50 @@ export default function Home() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Featured Deep Dive - RASK */}
+      <div className="mb-8">
+        <Link to="/deep-dive/rask" className="block group">
+          <div className="card-paper rounded-2xl overflow-hidden ring-1 ring-primary/20 hover:ring-primary/40 transition-all duration-300">
+            <div className="flex flex-col md:flex-row">
+              <div className="md:w-1/3 h-40 md:h-auto relative overflow-hidden">
+                <img
+                  src="/images/rask-arch.png"
+                  alt="RASK 架构图"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-3 left-3">
+                  <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded-md font-mono">
+                    深度解读
+                  </span>
+                </div>
+              </div>
+              <div className="flex-1 p-5 md:p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="tag-ai text-xs font-mono px-2 py-0.5 rounded">FAST 2026</span>
+                  <span className="tag-storage text-xs font-mono px-2 py-0.5 rounded">索引结构</span>
+                </div>
+                <h2 className="text-lg md:text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  "Range as a Key" is the Key!
+                </h2>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                  Fast and Compact Cloud Block Store Index with RASK — 通过范围树和合并策略实现 80% 空间节省、50% 延迟降低
+                </p>
+                <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="w-3.5 h-3.5" />
+                    15 分钟深度阅读
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <ArrowRight className="w-3.5 h-3.5" />
+                    查看完整解读
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Filter bar */}
