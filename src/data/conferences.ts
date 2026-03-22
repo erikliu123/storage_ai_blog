@@ -21,7 +21,6 @@ export const osdi2025Papers: PaperData[] = [
     session: 'Database Systems',
     highlight: true,
     summary: '基于 CXL 互联的分布式数据库系统，利用 CXL 低延迟特性实现跨节点共享内存池，重新设计事务处理和存储引擎以充分发挥 CXL 优势。',
-    archDiagram: '/images/tigon-arch.png',
     keywords: ['CXL', 'Distributed DB', 'Shared Memory', 'Database'],
     archDiagram: '/images/tigon-arch.png',
     contributions: ['设计 CXL-aware 数据库架构，支持跨节点共享内存池', '实现跨节点共享内存事务协议，减少数据复制', '延迟降低 50%，吞吐提升 2x，内存利用率提升 3x'],
