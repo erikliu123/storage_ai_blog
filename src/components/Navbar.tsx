@@ -6,8 +6,9 @@ import { useState } from 'react'
 const navItems = [
   { href: '/', label: '论文列表', icon: BookOpen },
   { href: '/fast2026', label: 'FAST 2026', icon: Award },
+  { href: '/osdi2025', label: 'OSDI 2025', icon: Award },
+  { href: '/atc2024', label: 'ATC 2024', icon: Award },
   { href: '/teams', label: '研究团队', icon: Users },
-  { href: '/daily', label: '每日更新', icon: Rss },
   { href: '/archive', label: 'Git 归档', icon: GitBranch },
 ]
 

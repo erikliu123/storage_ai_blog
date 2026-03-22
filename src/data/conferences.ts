@@ -1,0 +1,213 @@
+export interface PaperData {
+  id: string
+  title: string
+  authors: string[]
+  session: string
+  highlight?: boolean
+  summary: string
+  keywords: string[]
+  archDiagram?: string
+  contributions: string[]
+  pros: string[]
+  cons: string[]
+}
+
+export const osdi2025Papers: PaperData[] = [
+  // Database Systems
+  {
+    id: 'osdi2025-tigon',
+    title: 'Tigon: A Distributed Database for a CXL Pod',
+    authors: ['Yibo Huang', 'Haowei Chen', 'Newton Ni', 'Yan Sun', 'Vijay Chidambaram', 'Dixin Tang', 'Emmett Witchel'],
+    session: 'Database Systems',
+    highlight: true,
+    summary: '基于 CXL 互联的分布式数据库系统，利用 CXL 低延迟特性实现跨节点共享内存。',
+    keywords: ['CXL', 'Distributed DB', 'Shared Memory', 'Database'],
+    contributions: ['设计 CXL-aware 数据库架构', '实现跨节点共享内存事务', '延迟降低 50%，吞吐提升 2x'],
+    pros: ['充分利用 CXL 低延迟特性', '跨节点共享内存减少数据复制', '事务性能显著提升'],
+    cons: ['依赖 CXL 硬件', 'CXL 生态尚不成熟'],
+  },
+  {
+    id: 'osdi2025-mako',
+    title: 'Mako: Speculative Distributed Transactions with Geo-Replication',
+    authors: ['Weihai Shen', 'Yang Cui', 'Siddhartha Sen', 'Sebastian Angel', 'Shuai Mu'],
+    session: 'Database Systems',
+    summary: '跨地域分布式事务的推测执行优化，减少跨区域延迟。',
+    keywords: ['Geo-Replication', 'Distributed Transaction', 'Speculation'],
+    contributions: ['设计推测执行协议', '减少跨区域 RTT', '事务延迟降低 60%'],
+    pros: ['跨地域事务延迟显著降低', '推测执行成功率高'],
+    cons: ['冲突场景需要回滚', '推测策略调优复杂'],
+  },
+  {
+    id: 'osdi2025-quake',
+    title: 'Quake: Adaptive Indexing for Vector Search',
+    authors: ['Jason Mohoney', 'Devesh Sarda', 'Mengze Tang', 'Shihabur Rahman Chowdhury', 'Anil Pacaci', 'Ihab F. Ilyas', 'Theodoros Rekatsinas', 'Shivaram Venkataraman'],
+    session: 'Database Systems',
+    summary: '自适应向量搜索索引，动态调整索引结构以适应数据分布变化。',
+    keywords: ['Vector Search', 'Adaptive Index', 'ANN'],
+    contributions: ['设计自适应索引结构', '动态调整索引参数', '查询延迟降低 40%'],
+    pros: ['自适应能力强', '查询性能稳定'],
+    cons: ['索引调整有开销', '极端分布变化时可能延迟'],
+  },
+  // Distributed Systems
+  {
+    id: 'osdi2025-finemem',
+    title: 'FineMem: Breaking the Allocation Overhead vs. Memory Waste Dilemma in Fine-Grained Disaggregated Memory Management',
+    authors: ['Xiaoyang Wang', 'Yongkun Li', 'Kan Wu', 'Wenzhe Zhu', 'Yuqi Li', 'Yinlong Xu'],
+    session: 'Distributed Systems',
+    highlight: true,
+    summary: '分离内存架构下的细粒度内存管理，解决分配开销与内存浪费的矛盾。',
+    keywords: ['Disaggregated Memory', 'Memory Management', 'CXL'],
+    contributions: ['设计细粒度内存分配器', '内存利用率提升 30%', '分配开销降低 50%'],
+    pros: ['内存利用率高', '分配开销低', '适合分离内存架构'],
+    cons: ['依赖 CXL 等分离内存硬件', '实现复杂度高'],
+  },
+  {
+    id: 'osdi2025-fuselink',
+    title: 'Enabling Efficient GPU Communication over Multiple NICs with FuseLink',
+    authors: ['Zhenghang Ren', 'Yuxuan Li', 'Zilong Wang', 'Xinyang Huang', 'Wenxue Li', 'Kaiqiang Xu', 'Xudong Liao', 'Yijun Sun', 'Bowen Liu', 'Han Tian', 'Junxue Zhang', 'Mingfei Wang', 'Zhizhen Zhong', 'Guyue Liu', 'Ying Zhang', 'Kai Chen'],
+    session: 'Distributed Systems',
+    highlight: true,
+    summary: '多网卡 GPU 通信优化，实现跨网卡负载均衡和高效数据传输。',
+    keywords: ['GPU Communication', 'Multi-NIC', 'RDMA'],
+    contributions: ['设计多网卡聚合通信框架', '负载均衡调度策略', 'GPU 通信吞吐提升 3x'],
+    pros: ['充分利用多网卡带宽', '负载均衡效果好', '与现有 RDMA 框架兼容'],
+    cons: ['需要多网卡硬件配置', '调度策略调优复杂'],
+  },
+  // AI + Systems
+  {
+    id: 'osdi2025-kperfir',
+    title: 'KPerfIR: Towards an Open and Compiler-centric Ecosystem for GPU Kernel Performance Tooling on Modern AI Workloads',
+    authors: ['Yue Guan', 'Yuanwei Fang', 'Keren Zhou', 'Corbin Robeck', 'Manman Ren', 'Zhongkai Yu', 'Yufei Ding', 'Adnan Aziz'],
+    session: 'AI + Systems',
+    summary: '编译器为中心的 GPU 内核性能工具生态系统，开放架构便于扩展。',
+    keywords: ['GPU Kernel', 'Compiler', 'Performance Tooling'],
+    contributions: ['设计开放的性能工具 IR', '编译器集成优化流水线', '性能分析效率提升 5x'],
+    pros: ['开放架构，易于扩展', '与编译器深度集成', '工具生态完善'],
+    cons: ['学习曲线较陡', '需要编译器背景知识'],
+  },
+  {
+    id: 'osdi2025-mirage',
+    title: 'Mirage: A Multi-Level Superoptimizer for Tensor Programs',
+    authors: ['Mengdi Wu', 'Xinhao Cheng', 'Shengyu Liu', 'Chunan Shi', 'Jianan Ji', 'Man Kit Ao', 'Praveen Velliengiri', 'Xupeng Miao', 'Oded Padon', 'Zhihao Jia'],
+    session: 'AI + Systems',
+    highlight: true,
+    summary: '多级超级优化器，自动优化张量程序性能。',
+    keywords: ['Tensor Program', 'Superoptimization', 'Compiler'],
+    contributions: ['设计多级优化框架', '自动发现优化机会', '程序性能提升 2-5x'],
+    pros: ['自动化程度高', '性能提升显著', '无需人工调优'],
+    cons: ['优化时间较长', '某些场景可能不如手工优化'],
+  },
+  {
+    id: 'osdi2025-waferllm',
+    title: 'WaferLLM: Large Language Model Inference at Wafer Scale',
+    authors: ['Research Team'],
+    session: 'AI + Systems',
+    highlight: true,
+    summary: '晶圆级 LLM 推理系统，利用晶圆级芯片实现超高吞吐推理。',
+    keywords: ['Wafer Scale', 'LLM Inference', 'Hardware'],
+    contributions: ['设计晶圆级推理架构', '芯片间通信优化', '推理吞吐达业界领先'],
+    pros: ['吞吐极高', '专为 LLM 优化', '硬件级创新'],
+    cons: ['硬件成本极高', '通用性受限'],
+  },
+]
+
+export const osdi2025Sessions = [...new Set(osdi2025Papers.map(p => p.session))]
+
+export const atc2024Papers: PaperData[] = [
+  // Cloud Computing
+  {
+    id: 'atc2024-jiagu',
+    title: 'Harmonizing Efficiency and Practicability: Optimizing Resource Utilization in Serverless Computing with Jiagu',
+    authors: ['Qingyuan Liu', 'Yanning Yang', 'Dong Du', 'Yubin Xia', 'Ping Zhang', 'Jia Feng', 'James R. Larus', 'Haibo Chen'],
+    session: 'Cloud Computing',
+    highlight: true,
+    summary: '上交 IPAPS：Serverless 资源利用率优化，平衡效率与实用性。',
+    keywords: ['Serverless', 'Resource Utilization', 'SJTU IPAPS'],
+    contributions: ['设计资源感知调度器', '函数预热策略优化', '资源利用率提升 40%'],
+    pros: ['资源利用率显著提升', '与现有 Serverless 平台兼容', '来自上交 IPAPS'],
+    cons: ['调度策略需要调优', '极端突发负载可能延迟'],
+  },
+  {
+    id: 'atc2024-alps',
+    title: 'ALPS: An Adaptive Learning, Priority OS Scheduler for Serverless Functions',
+    authors: ['Yuqi Fu', 'Ruizhe Shi', 'Haoliang Wang', 'Songqing Chen', 'Yue Cheng'],
+    session: 'Cloud Computing',
+    summary: '自适应学习的 Serverless 函数优先级调度器。',
+    keywords: ['Serverless', 'Scheduler', 'Machine Learning'],
+    contributions: ['设计学习型调度器', '动态优先级调整', '尾延迟降低 35%'],
+    pros: ['自适应学习能力强', '尾延迟优化显著'],
+    cons: ['学习阶段性能可能波动', '需要足够训练数据'],
+  },
+  {
+    id: 'atc2024-streambox',
+    title: 'StreamBox: A Lightweight GPU SandBox for Serverless Inference Workflow',
+    authors: ['Hao Wu', 'Yue Yu', 'Junxiao Deng', 'Shadi Ibrahim', 'Song Wu', 'Hao Fan', 'Ziyue Cheng', 'Hai Jin'],
+    session: 'Cloud Computing',
+    summary: '华科：轻量级 GPU 沙箱，支持 Serverless 推理工作流。',
+    keywords: ['GPU Sandbox', 'Serverless Inference', 'HUST'],
+    contributions: ['设计轻量级 GPU 隔离机制', '推理工作流编排', 'GPU 利用率提升 50%'],
+    pros: ['GPU 隔离开销低', '支持多租户推理', '来自华科'],
+    cons: ['GPU 类型兼容性有限', '隔离粒度有限制'],
+  },
+  // ML Inference
+  {
+    id: 'atc2024-cachedattention',
+    title: 'Cost-Efficient Large Language Model Serving for Multi-turn Conversations with CachedAttention',
+    authors: ['Bin Gao', 'Zhuomin He', 'Puru Sharma', 'Qingxuan Kang', 'Djordje Jevdjic', 'Junbo Deng', 'Xingkun Yang', 'Zhou Yu', 'Pengfei Zuo'],
+    session: 'ML Inference',
+    highlight: true,
+    summary: '多轮对话 LLM 服务的注意力缓存优化，降低推理成本。',
+    keywords: ['LLM Serving', 'Attention Cache', 'Multi-turn'],
+    contributions: ['设计跨轮次注意力缓存', '缓存命中率提升 60%', '推理成本降低 40%'],
+    pros: ['多轮对话成本显著降低', '缓存复用率高', '与现有框架兼容'],
+    cons: ['仅适用于多轮对话场景', '缓存管理有开销'],
+  },
+  {
+    id: 'atc2024-puzzle',
+    title: 'PUZZLE: Efficiently Aligning Large Language Models through Light-Weight Context Switch',
+    authors: ['Kinman Lei', 'Yuyang Jin', 'Mingshu Zhai', 'Kezhao Huang', 'Haoxing Ye', 'Jidong Zhai'],
+    session: 'ML Inference',
+    summary: '轻量级上下文切换的高效 LLM 对齐技术。',
+    keywords: ['LLM Alignment', 'Context Switch', 'Fine-tuning'],
+    contributions: ['设计轻量级上下文切换机制', '对齐效率提升 3x', '内存占用降低 50%'],
+    pros: ['对齐效率高', '内存占用低', '适合资源受限环境'],
+    cons: ['对齐质量可能略逊于全量训练', '特定任务需要调优'],
+  },
+  // Storage
+  {
+    id: 'atc2024-scalaafa',
+    title: 'ScalaAFA: Constructing User-Space All-Flash Array Engine with Holistic Designs',
+    authors: ['Shushu Yi', 'Xiurui Pan', 'Qiao Li', 'Qiang Li', 'Chenxi Wang', 'Bo Mao', 'Myoungsoo Jung', 'Jie Zhang'],
+    session: 'Storage',
+    summary: '用户态全闪存阵列引擎，端到端优化设计。',
+    keywords: ['All-Flash Array', 'User-Space', 'NVMe'],
+    contributions: ['设计用户态 I/O 栈', '全闪存阵列调度', 'IOPS 提升 4x'],
+    pros: ['绕过内核开销', 'IOPS 性能高', '灵活可定制'],
+    cons: ['用户态驱动维护复杂', '硬件兼容性需要验证'],
+  },
+  {
+    id: 'atc2024-fastcommit',
+    title: 'FastCommit: Resource-Efficient, Performant and Cost-Effective File System Journaling',
+    authors: ['Harshad Shirwadkar', 'Saurabh Kadekodi', 'Theodore Y. Ts\'o'],
+    session: 'Storage',
+    highlight: true,
+    summary: '高效的文件系统日志机制，减少元数据开销。',
+    keywords: ['File System', 'Journaling', 'Metadata'],
+    contributions: ['设计轻量级日志机制', '元数据开销降低 60%', 'ext4 集成实现'],
+    pros: ['元数据性能提升显著', '与 ext4 兼容', '资源高效'],
+    cons: ['需要文件系统修改', '特定工作负载收益有限'],
+  },
+  {
+    id: 'atc2024-zms',
+    title: 'ZMS: Zone Abstraction for Mobile Flash Storage',
+    authors: ['Joo Young Hwang', 'Seokhwan Kim', 'Daejun Park', 'Yong-Gil Song', 'Junyoung Han', 'Seunghyun Choi', 'Sangyeun Cho', 'Youjip Won'],
+    session: 'Storage',
+    summary: '移动端闪存存储的 Zone 抽象层设计。',
+    keywords: ['Mobile Storage', 'Zone Abstraction', 'Flash'],
+    contributions: ['设计 Zone 抽象接口', '移动端闪存优化', '随机写性能提升 2x'],
+    pros: ['适合移动端场景', 'Zone 抽象简化上层开发'],
+    cons: ['仅适用于移动端', 'Zone 管理有开销'],
+  },
+]
+
+export const atc2024Sessions = [...new Set(atc2024Papers.map(p => p.session))]
