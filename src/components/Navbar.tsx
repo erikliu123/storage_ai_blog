@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpen, GitBranch, Search, Users, Award } from 'lucide-react'
+import { BookOpen, GitBranch, Search, Users, Award, Bug } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 
@@ -8,6 +8,7 @@ const navItems = [
   { href: '/fast2026', label: 'FAST 2026', icon: Award },
   { href: '/osdi2025', label: 'OSDI 2025', icon: Award },
   { href: '/atc2024', label: 'ATC 2024', icon: Award },
+  { href: '/linux-bugfix', label: 'Linux Bugfix', icon: Bug },
   { href: '/teams', label: '研究团队', icon: Users },
   { href: '/archive', label: 'Git 归档', icon: GitBranch },
 ]
