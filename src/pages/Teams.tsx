@@ -1,4 +1,5 @@
-import { ExternalLink, MapPin, Globe, Users, BookOpen } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ExternalLink, MapPin, Globe, Users, BookOpen, TrendingUp } from 'lucide-react'
 import { teams } from '@/data/teams'
 import { cn } from '@/lib/utils'
 
@@ -19,101 +20,104 @@ export default function Teams() {
 
       {/* Team cards */}
       <div className="space-y-6">
-        {teams.map((team, idx) => (
-          <article key={team.id} className="card-paper rounded-2xl p-6">
-            {/* Header row */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-raised border border-border text-muted-foreground">
-                    {team.institutionShort}
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3" />
-                    {team.location}
-                  </span>
+        {teams.map((team) => (
+          <article key={team.id} className="card-paper rounded-2xl overflow-hidden">
+            <div className="p-6">
+              {/* Header row */}
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-raised border border-border text-muted-foreground">
+                      {team.institutionShort}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      {team.location}
+                    </span>
+                  </div>
+                  <h2 className="text-lg font-semibold text-foreground">{team.name}</h2>
+                  <p className="text-xs font-mono text-muted-foreground">{team.nameEn}</p>
                 </div>
-                <h2 className="text-lg font-semibold text-foreground">{team.name}</h2>
-                <p className="text-xs font-mono text-muted-foreground">{team.nameEn}</p>
+                <a
+                  href={team.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  官网
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
-              <a
-                href={team.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                官网
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
 
-            {/* Institution */}
-            <p className="text-xs text-muted-foreground mb-4">{team.institution}</p>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-2 rounded-lg bg-surface-raised border border-border">
+                  <div className="text-lg font-bold text-primary">{team.stats.totalPapers}+</div>
+                  <div className="text-xs text-muted-foreground font-mono">论文</div>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-surface-raised border border-border">
+                  <div className="text-lg font-bold text-green-400">{team.stats.topConferences}+</div>
+                  <div className="text-xs text-muted-foreground font-mono">顶会</div>
+                </div>
+                <div className="text-center p-2 rounded-lg bg-surface-raised border border-border">
+                  <div className="text-lg font-bold text-yellow-400">{team.stats.students}+</div>
+                  <div className="text-xs text-muted-foreground font-mono">学生</div>
+                </div>
+              </div>
 
-            {/* Description */}
-            <p className="text-sm text-foreground/80 leading-relaxed mb-5">{team.description}</p>
+              {/* Professors */}
+              <div className="mb-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">PI / 教授</h3>
+                <div className="flex flex-wrap gap-2">
+                  {team.professors.slice(0, 3).map(p => (
+                    <span key={p.nameEn} className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                      {p.name}
+                    </span>
+                  ))}
+                  {team.professors.length > 3 && (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-surface-raised text-muted-foreground border border-border">
+                      +{team.professors.length - 3}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-            {/* Professors */}
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="text-xs font-semibold text-muted-foreground">PI:</span>
-              {team.professors.map(p => (
-                <span key={p} className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                  {p}
-                </span>
-              ))}
-            </div>
+              {/* Recent papers preview */}
+              <div className="mb-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">最新论文</h3>
+                <div className="space-y-1.5">
+                  {team.papers.slice(0, 3).map(paper => (
+                    <div key={paper.id} className="flex items-center gap-2 text-xs">
+                      <span className={cn(
+                        'font-mono px-1.5 py-0.5 rounded',
+                        paper.highlight ? 'tag-ai' : 'bg-surface-raised text-muted-foreground'
+                      )}>
+                        {paper.venue}
+                      </span>
+                      <span className="text-muted-foreground">{paper.year}</span>
+                      <span className="text-foreground/80 truncate flex-1">{paper.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-            {/* Focus areas */}
-            <div className="mb-5">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">研究方向</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {team.focusAreas.map(area => (
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {team.focusAreas.slice(0, 4).map(area => (
                   <span key={area} className="px-2 py-0.5 rounded text-xs font-mono bg-surface-raised border border-border text-muted-foreground">
                     {area}
                   </span>
                 ))}
               </div>
-            </div>
 
-            {/* Key papers */}
-            <div>
-              <h3 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                <BookOpen className="w-3.5 h-3.5" />
-                代表性论文
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {team.keyPapers.map((paper, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 p-3 rounded-lg bg-surface border border-border hover:border-primary/20 transition-colors group"
-                  >
-                    <span className="flex-shrink-0 w-5 h-5 rounded flex items-center justify-center text-xs font-mono font-bold text-muted-foreground bg-surface-raised border border-border">
-                      {i + 1}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-foreground/85 leading-snug group-hover:text-foreground transition-colors line-clamp-2">
-                        {paper.title}
-                      </p>
-                      <p className="text-xs font-mono text-muted-foreground mt-1">
-                        {paper.venue} {paper.year}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div className="flex flex-wrap gap-1.5 mt-5 pt-4 border-t border-border">
-              {team.tags.map(tag => (
-                <span key={tag} className={cn(
-                  'px-2 py-0.5 rounded text-xs font-mono',
-                  idx === 0 ? 'tag-ai' : idx === 1 ? 'tag-storage' : 'tag-ssd'
-                )}>
-                  #{tag}
-                </span>
-              ))}
+              {/* View detail button */}
+              <Link
+                to={`/teams/${team.id}`}
+                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+              >
+                查看全部论文与学生 →
+              </Link>
             </div>
           </article>
         ))}
