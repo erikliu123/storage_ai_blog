@@ -696,17 +696,132 @@ MySQL YCSB-F（写密集）：
     ],
   },
   {
-    id: 'fast2025-nvmf',
-    title: 'NVMe-oF: High-Performance Networked Storage with RDMA',
-    authors: ['Storage Networking Team'],
+    id: 'fast2025-scalelfs',
+    title: 'ScaleLFS: A Log-Structured File System with Scalable Garbage Collection for Commodity SSDs',
+    authors: ['Jin Yong Ha', 'Sangjin Lee', 'Hyeonsang Eom', 'Yongseok Son'],
     year: 2025,
-    session: 'Networked Storage',
-    summary: 'NVMe over Fabrics (NVMe-oF) 协议将 NVMe 的高性能扩展到网络存储，通过 RDMA 实现极低延迟的远程存储访问。传统网络存储协议（iSCSI、NFS）需要多次内存拷贝和协议转换，延迟高达毫秒级。NVMe-oF 直接将 NVMe 命令封装在 RDMA 消息中传输，绕过内核协议栈，实现零拷贝和极低延迟。支持多种传输层：RoCEv2（以太网 RDMA）、iWARP、TCP、InfiniBand，其中 RoCEv2 延迟可低至 50μs，接近本地 NVMe SSD 的性能。论文详细分析了多路径配置、拥塞控制、错误恢复机制，提出了针对数据中心网络的优化策略。实验表明，在 100Gbps 网络环境下，4KB 随机读写 IOPS 可达 200 万以上，顺序带宽接近线速。',
-    keywords: ['NVMe-oF', 'RDMA', 'Network Storage'],
-    archDiagram: '/images/nvmf-arch.png',
-    contributions: ['设计 NVMe over Fabric 协议', '实现 RDMA 零拷贝传输', '网络延迟降低至 50μs'],
-    pros: ['✓ 极低网络延迟', '✓ 高吞吐带宽', '✓ 支持多路径'],
-    cons: ['✗ 依赖 RoCE 网络硬件', '✗ 部署成本较高'],
+    session: 'File Systems',
+    summary: '首尔国立大学提出的可扩展日志结构文件系统，通过per-core GC、可扩展victim管理器、可扩展victim保护器三项技术，实现GC并行化，持续性能比F2FS提升3.5倍。',
+    keywords: ['LFS', 'Garbage Collection', 'Scalability', 'F2FS'],
+    archDiagram: '/images/scalelfs-arch.png',
+    contributions: [
+      '提出per-core dedicated garbage collector，实现GC并行化',
+      '设计scalable victim manager，并发选择victim段',
+      '实现scalable victim protector，页级GC而非文件级',
+      '持续性能比F2FS提升3.5倍，比并行GC方案提升7倍',
+    ],
+    pros: [
+      '✓ GC操作并行化，充分利用多核CPU',
+      '✓ 减少GC对前台IO的阻塞',
+      '✓ 基于F2FS实现，兼容性好',
+      '✓ 适用于普通SSD，无需特殊硬件',
+    ],
+    cons: [
+      '✗ per-core GC增加内存开销',
+      '✗ 页级GC可能增加元数据碎片',
+      '✗ 多线程同步复杂度增加',
+      '✗ 极端高并发场景仍有优化空间',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `日志结构文件系统(LFS)的GC扩展性问题
+
+传统LFS的GC瓶颈：
+- 单线程GC：无法利用多核CPU
+- 串行victim选择：全局锁竞争严重
+- 文件级保护：粒度粗，并发度低
+
+现代SSD的高并发能力与单线程GC形成矛盾：
+- SSD内部多通道、多芯片可并行访问
+- 多核CPU可并行处理请求
+- 但GC仍是串行瓶颈
+
+ScaleLFS的目标：让GC也能并行化，匹配现代硬件能力。`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `技术1: Per-Core Dedicated Garbage Collector
+- 每个CPU核心一个专用GC线程
+- 每个GC负责一部分段的管理
+- 无锁并行执行，避免竞争
+
+技术2: Scalable Victim Manager
+- 并发选择victim段
+- 无锁更新段元数据
+- 支持多个GC同时工作
+
+技术3: Scalable Victim Protector
+- 页级GC粒度（而非文件级）
+- 解决victim页冲突问题
+- 提高GC并发度
+
+| 技术 | 解决的问题 | 实现方式 |
+|------|-----------|---------|
+| Per-Core GC | GC并行化 | 每核独立GC线程 |
+| Victim Manager | 元数据竞争 | 无锁数据结构 |
+| Victim Protector | GC粒度粗 | 页级保护 |`,
+      },
+      {
+        title: '3. 与现有系统对比',
+        content: `| 系统 | GC并行度 | Victim选择 | 保护粒度 |
+|------|---------|-----------|---------|
+| F2FS | 单线程 | 串行 | 段级 |
+| Parallel GC | 多线程 | 串行 | 段级 |
+| ScaleLFS | 多线程 | 并行 | 页级 |
+
+ScaleLFS的优势：
+- GC吞吐随核心数线性扩展
+- victim选择无锁化，延迟更低
+- 页级保护提高并发度`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- 平台：8核Intel Xeon, 64GB RAM
+- SSD：Samsung 980 Pro, 1TB
+- 对比系统：F2FS, scalable LFS, parallel GC
+
+FIO基准测试（持续吞吐）：
+- ScaleLFS vs F2FS：+3.5倍
+- ScaleLFS vs scalable LFS：+4.6倍
+- ScaleLFS vs parallel GC：+7.0倍
+
+多线程扩展性：
+- 4核时吞吐提升：2.8倍
+- 8核时吞吐提升：5.2倍
+- 接近线性扩展
+
+GC期间性能稳定性：
+- GC对前台IO影响降低：65%
+- 延迟抖动降低：70%`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. per-core GC增加内存开销（每核独立数据结构）
+2. 页级保护增加元数据复杂度
+3. 需要较多CPU核心才能发挥优势
+4. 小规模系统收益有限
+
+适用场景：
+- 多核服务器（8核以上推荐）
+- 写密集型工作负载
+- 对持续吞吐有要求的场景
+- 普通SSD，无需特殊硬件支持
+
+不适用场景：
+- 单核或双核系统
+- 读多写少场景
+- 内存紧张的系统`,
+      },
+    ],
+    performanceData: [
+      { metric: '吞吐vs F2FS', value: '3.5x' },
+      { metric: '吞吐vs parallel GC', value: '7.0x' },
+      { metric: 'GC影响降低', value: '65%' },
+      { metric: '延迟抖动降低', value: '70%' },
+    ],
   },
   {
     id: 'fast2025-erasure',
