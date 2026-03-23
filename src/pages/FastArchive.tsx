@@ -1,7 +1,106 @@
-import { Calendar, MapPin, BookOpen, Image, Zap, Clock } from 'lucide-react'
+import { Calendar, MapPin, BookOpen, Image, Zap, Clock, ExternalLink, Table2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { fast2025Papers, fast2024Papers, fast2023Papers, fast2022Papers, type ArchivePaperData } from '@/data/fastArchive'
+
+// Helper function to parse markdown-like content
+function formatContent(content: string) {
+  // Split by lines and process each line
+  const lines = content.split('\n')
+  const elements: JSX.Element[] = []
+
+  lines.forEach((line, idx) => {
+    // Check for headers (###, ##, #)
+    if (line.startsWith('### ')) {
+      elements.push(<h4 key={idx} className="text-xs font-bold text-primary mt-3 mb-1">{line.slice(4)}</h4>)
+    } else if (line.startsWith('## ')) {
+      elements.push(<h3 key={idx} className="text-sm font-bold text-foreground mt-4 mb-2">{line.slice(3)}</h3>)
+    } else if (line.startsWith('# ')) {
+      elements.push(<h2 key={idx} className="text-base font-bold text-foreground mt-4 mb-2">{line.slice(2)}</h2>)
+    }
+    // Check for bullet points
+    else if (line.startsWith('- ') || line.startsWith('* ')) {
+      const text = line.slice(2)
+      elements.push(
+        <li key={idx} className="text-xs text-muted-foreground ml-3 flex items-start gap-2 my-1">
+          <span className="text-primary mt-1">•</span>
+          <span>{formatInlineStyles(text)}</span>
+        </li>
+      )
+    }
+    // Check for numbered lists
+    else if (/^\d+\.\s/.test(line)) {
+      const match = line.match(/^(\d+)\.\s(.*)$/)
+      if (match) {
+        elements.push(
+          <li key={idx} className="text-xs text-muted-foreground ml-3 flex items-start gap-2 my-1">
+            <span className="text-primary font-bold min-w-[1.2em]">{match[1]}.</span>
+            <span>{formatInlineStyles(match[2])}</span>
+          </li>
+        )
+      }
+    }
+    // Check for table rows (starting with |)
+    else if (line.startsWith('|') && line.includes('|')) {
+      const cells = line.split('|').filter(c => c.trim())
+      // Check if it's a separator row
+      if (cells.every(c => /^[-:]+$/.test(c.trim()))) {
+        // Skip separator rows for now
+        return
+      }
+      elements.push(
+        <div key={idx} className="grid gap-2 my-0.5" style={{ gridTemplateColumns: `repeat(${cells.length}, 1fr)` }}>
+          {cells.map((cell, cellIdx) => (
+            <div key={cellIdx} className="text-xs px-2 py-1 bg-surface-raised/50 rounded border border-border/30">
+              {formatInlineStyles(cell.trim())}
+            </div>
+          ))}
+        </div>
+      )
+    }
+    // Empty line
+    else if (line.trim() === '') {
+      elements.push(<div key={idx} className="h-2" />)
+    }
+    // Regular paragraph
+    else {
+      elements.push(
+        <p key={idx} className="text-xs text-muted-foreground leading-relaxed my-1">
+          {formatInlineStyles(line)}
+        </p>
+      )
+    }
+  })
+
+  return <>{elements}</>
+}
+
+// Helper function to format inline styles (bold, code, etc.)
+function formatInlineStyles(text: string): JSX.Element {
+  // Process bold text (**text**)
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return (
+    <>
+      {parts.map((part, idx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={idx} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>
+        }
+        // Process inline code (`code`)
+        const codeParts = part.split(/(`[^`]+`)/g)
+        return (
+          <span key={idx}>
+            {codeParts.map((codePart, codeIdx) => {
+              if (codePart.startsWith('`') && codePart.endsWith('`')) {
+                return <code key={codeIdx} className="px-1 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-mono">{codePart.slice(1, -1)}</code>
+              }
+              return <span key={codeIdx}>{codePart}</span>
+            })}
+          </span>
+        )
+      })}
+    </>
+  )
+}
 
 // Paper Card Component
 function ArchivePaperCard({ paper, idx }: { paper: ArchivePaperData; idx: number }) {
@@ -77,13 +176,17 @@ function ArchivePaperCard({ paper, idx }: { paper: ArchivePaperData; idx: number
             {/* Performance Data */}
             {paper.performanceData && paper.performanceData.length > 0 && (
               <div className="mt-3 pt-3 border-t border-border/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <Table2 className="w-3 h-3 text-primary" />
+                  <span className="text-xs font-semibold text-foreground">性能指标</span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {paper.performanceData.map((perf, i) => (
-                    <div key={i} className="bg-surface-raised rounded-lg p-2 text-center">
+                    <div key={i} className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-2.5 text-center border border-primary/20">
                       <div className="text-sm font-bold text-primary">{perf.value}</div>
                       <div className="text-xs text-muted-foreground">{perf.metric}</div>
                       {perf.baseline && (
-                        <div className="text-xs text-muted-foreground/70">基准: {perf.baseline}</div>
+                        <div className="text-[10px] text-muted-foreground/70 mt-0.5">基准: {perf.baseline}</div>
                       )}
                     </div>
                   ))}
@@ -94,7 +197,10 @@ function ArchivePaperCard({ paper, idx }: { paper: ArchivePaperData; idx: number
             {/* Architecture Diagram */}
             {paper.archDiagram && expanded && (
               <div className="mt-3 pt-3 border-t border-border/50">
-                <h4 className="text-xs font-semibold text-foreground mb-2">架构图</h4>
+                <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-2">
+                  <Image className="w-3 h-3 text-primary" />
+                  架构图
+                </h4>
                 {paper.archDiagram.startsWith('/') ? (
                   <img src={paper.archDiagram} alt="Architecture Diagram" className="w-full rounded-lg border border-border bg-surface-raised" />
                 ) : (
@@ -105,23 +211,35 @@ function ArchivePaperCard({ paper, idx }: { paper: ArchivePaperData; idx: number
 
             {/* Pros & Cons */}
             {expanded && (paper.pros.length > 0 || paper.cons.length > 0) && (
-              <div className="mt-3 pt-3 border-t border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="mt-3 pt-3 border-t border-border/50 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {paper.pros.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-green-400 mb-1.5">优势</h4>
-                    <ul className="space-y-1">
+                  <div className="bg-green-500/5 rounded-lg p-3 border border-green-500/20">
+                    <h4 className="text-xs font-bold text-green-500 mb-2 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      优势
+                    </h4>
+                    <ul className="space-y-1.5">
                       {paper.pros.map((p, i) => (
-                        <li key={i} className="text-xs text-muted-foreground leading-relaxed">{p}</li>
+                        <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                          <span className="text-green-500 mt-0.5">✓</span>
+                          <span>{p.replace('✓ ', '')}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
                 )}
                 {paper.cons.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-red-400 mb-1.5">局限性</h4>
-                    <ul className="space-y-1">
+                  <div className="bg-red-500/5 rounded-lg p-3 border border-red-500/20">
+                    <h4 className="text-xs font-bold text-red-400 mb-2 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                      局限性
+                    </h4>
+                    <ul className="space-y-1.5">
                       {paper.cons.map((c, i) => (
-                        <li key={i} className="text-xs text-muted-foreground leading-relaxed">{c}</li>
+                        <li key={i} className="text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                          <span className="text-red-400 mt-0.5">✗</span>
+                          <span>{c.replace('✗ ', '')}</span>
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -133,11 +251,29 @@ function ArchivePaperCard({ paper, idx }: { paper: ArchivePaperData; idx: number
             {paper.sections && paper.sections.length > 0 && expanded && (
               <div className="mt-3 pt-3 border-t border-border/50 space-y-3">
                 {paper.sections.map((section, i) => (
-                  <div key={i}>
-                    <h4 className="text-xs font-semibold text-foreground mb-1">{section.title}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">{section.content}</p>
+                  <div key={i} className="bg-surface-raised/30 rounded-lg p-3 border border-border/30">
+                    <h4 className="text-xs font-bold text-primary mb-2 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      {section.title}
+                    </h4>
+                    <div className="prose-sm">{formatContent(section.content)}</div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Paper URL */}
+            {paper.paperUrl && expanded && (
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <a
+                  href={paper.paperUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-xs text-primary hover:text-primary/80 transition-colors font-mono bg-primary/5 px-3 py-1.5 rounded-lg"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  查看论文原文
+                </a>
               </div>
             )}
 
