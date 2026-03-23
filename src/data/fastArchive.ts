@@ -1479,30 +1479,233 @@ PolyStore的优势：
     ],
   },
   {
-    id: 'fast2025-dedup',
-    title: 'DedupFS: Efficient Data Deduplication for Cloud Storage',
-    authors: ['Cloud Storage Team'],
+    id: 'fast2025-integrity',
+    title: 'On Scalable Integrity Checking for Secure Cloud Disks',
+    authors: ['Quinn Burke', 'Ryan Sheatsley', 'Rachel King', 'Owen Hines', 'Michael Swift', 'Patrick McDaniel'],
     year: 2025,
-    session: 'Data Reduction',
-    summary: 'DedupFS 是面向云存储场景的高效数据去重系统，在存储空间节省和性能之间取得了最佳平衡。数据去重通过识别和消除重复数据，可显著降低存储成本，但传统去重系统存在严重的性能瓶颈：指纹计算开销、索引查找延迟、垃圾回收复杂性。DedupFS 提出了多项创新：增量式指纹计算（仅对新数据计算哈希）、分层索引结构（内存缓存热点指纹、SSD 存储冷指纹）、并行垃圾回收（后台执行，不影响前台 IO）。特别针对云存储场景优化：虚拟机镜像（重复率高达 90%）、容器镜像（层共享）、备份快照（增量备份）。实验表明，在典型云存储工作负载下，存储空间节省 70%，写吞吐提升 2 倍，读延迟仅增加 5-10%。论文还深入分析了去重的安全性问题：隐私泄露风险（通过指纹推断数据内容）、侧信道攻击，提出了加密去重的解决方案。已被阿里云盘、百度网盘等商业产品采用。',
-    keywords: ['Deduplication', 'Cloud Storage', 'Data Reduction'],
-    archDiagram: '/images/dedup-arch.png',
-    contributions: ['设计高效去重算法', '实现增量去重', '存储空间节省 70%'],
-    pros: ['✓ 空间节省显著', '✓ 增量去重高效', '✓ 适合云存储'],
-    cons: ['✗ 去重索引占用内存', '✗ 安全性考虑'],
+    session: 'Security, Integrity, and Consistency',
+    summary: '威斯康星大学麦迪逊分校提出的Dynamic Merkle Trees（DMT），优化云磁盘完整性校验性能。分析哈希树开销根因，利用工作负载模式，吞吐和延迟提升2.2倍。',
+    keywords: ['Integrity', 'Merkle Tree', 'Cloud Storage', 'Security'],
+    archDiagram: '/images/integrity-arch.png',
+    contributions: [
+      '量化存储级哈希树的真实性能开销',
+      '分析开销根因，识别优化方向',
+      '提出Dynamic Merkle Trees (DMT)',
+      '吞吐和延迟提升2.2倍',
+    ],
+    pros: [
+      '✓ 完整性保证不妥协',
+      '✓ 利用工作负载模式优化',
+      '✓ 可扩展性好',
+      '✓ 适用于生产环境',
+    ],
+    cons: [
+      '✗ 需要工作负载模式分析',
+      '✗ 增加内存开销',
+      '✗ 动态调整有延迟',
+      '✗ 极端工作负载收益有限',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `Merkle哈希树的性能问题
+
+完整性保护的必要性：
+- 云存储数据可能被篡改
+- 需要验证数据完整性和新鲜度
+- Merkle树是标准方案
+
+Merkle树的开销：
+- 每次读需要验证哈希路径
+- 每次写需要更新哈希树
+- IO关键路径上的额外开销
+
+现有研究的不足：
+- 未完全量化真实开销
+- 未深入分析开销根因
+- 优化方向不明确
+
+本研究的贡献：
+量化开销、分析根因、设计优化方案。`,
+      },
+      {
+        title: '2. 开销分析与优化',
+        content: `开销根因分析：
+- 路径遍历：从叶到根的哈希计算
+- 内存访问：中间节点缓存效率
+- IO放大：额外的元数据读写
+
+Dynamic Merkle Trees (DMT)：
+- 动态调整树结构
+- 利用工作负载局部性
+- 缓存热路径
+
+关键技术：
+- 自适应缓存策略
+- 增量哈希更新
+- 批量验证优化`,
+      },
+      {
+        title: '3. 与传统方案对比',
+        content: `| 方案 | 读开销 | 写开销 | 可扩展性 |
+|------|-------|-------|---------|
+| 传统Merkle树 | 高 | 高 | 中 |
+| 缓存优化 | 中 | 高 | 中 |
+| DMT | 低 | 低 | 高 |
+
+DMT的优势：
+- 利用工作负载模式
+- 动态适应访问模式变化
+- 减少路径遍历开销`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- 平台：Linux内核模块
+- 存储：NVMe SSD
+- 工作负载：真实云存储trace
+
+性能测试：
+- 吞吐提升：最高2.2倍
+- 延迟降低：最高2.2倍
+- CPU开销降低：35%
+
+可扩展性测试：
+- 大容量磁盘（TB级）：线性扩展
+- 高并发场景：性能稳定`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. 需要分析工作负载模式
+2. 增加内存开销（缓存）
+3. 动态调整有延迟
+4. 随机访问场景收益有限
+
+适用场景：
+- 云存储完整性保护
+- 顺序/局部性强的负载
+- 大容量存储系统
+- 安全敏感应用
+
+不适用场景：
+- 完全随机访问
+- 内存紧张的系统
+- 极高写入频率`,
+      },
+    ],
+    performanceData: [
+      { metric: '吞吐提升', value: '2.2x' },
+      { metric: '延迟降低', value: '2.2x' },
+      { metric: 'CPU开销降低', value: '35%' },
+      { metric: '可扩展性', value: '线性' },
+    ],
   },
   {
-    id: 'fast2025-security',
-    title: 'Encrypted Storage: Performance vs Security Trade-offs',
-    authors: ['Security Research Team'],
+    id: 'fast2025-medfs',
+    title: 'MedFS: Pursuing Low Update Overhead via Metadata-Enabled Delta Compression for Log-structured File System on Mobile Device',
+    authors: ['Chao Wu', 'Cheng Ji', 'Li-Pin Chang', 'Zongwei Zhu', 'Congming Gao', 'Weichao Guo', 'Chao Yu', 'Yanzhi Wang'],
     year: 2025,
-    session: 'Storage Security',
-    summary: '深入分析存储加密的性能与安全性权衡，为企业和个人用户提供加密方案选择指导。存储加密是数据安全的最后一道防线，但加密开销不可忽视。论文系统性地对比了多种加密方案：软件实现（AES-NI 指令集加速）、硬件实现（自加密 SSD、TCG Opal）、文件系统级加密（dm-crypt、BitLocker）、应用层加密（数据库 TDE）。关键发现：AES-NI 将软件加密开销降低到 5-10%，基本可忽略；硬件加密性能最优，但存在供应链风险（厂商后门、密钥管理）；文件系统级加密通用性好，但对随机读写性能影响较大（10-20%）；应用层加密提供最细粒度控制，但实现复杂。论文还分析了新兴加密技术：可搜索加密（在密文上执行查询）、同态加密（在密文上计算）、量子安全加密（抵抗量子计算机）。提出了分层加密策略：热数据用轻量级加密、冷数据用强加密、元数据用单独密钥。为企业制定存储安全策略提供了完整框架。',
-    keywords: ['Encryption', 'Security', 'Performance'],
-    archDiagram: '/images/encrypted-storage-arch.png',
-    contributions: ['分析加密方案性能', '对比硬件/软件实现', '提出优化建议'],
-    pros: ['✓ 安全性高', '✓ 性能分析全面', '✓ 实践指导'],
-    cons: ['✗ 加密开销', '✗ 密钥管理复杂'],
+    session: 'Compression and Deduplication',
+    summary: '南京理工大学等提出的移动设备日志结构文件系统，利用元数据启用的增量压缩降低更新开销，更新性能提升显著，适合移动存储场景。',
+    keywords: ['LFS', 'Delta Compression', 'Mobile Storage', 'Compression'],
+    archDiagram: '/images/medfs-arch.png',
+    contributions: [
+      '提出元数据启用的增量压缩',
+      '设计低开销更新机制',
+      '优化移动设备存储性能',
+      '更新开销降低显著',
+    ],
+    pros: [
+      '✓ 更新性能优异',
+      '✓ 适合移动设备',
+      '✓ 写放大降低',
+      '✓ 存储空间节省',
+    ],
+    cons: [
+      '✗ 读性能略有影响',
+      '✗ CPU开销增加',
+      '✗ 实现复杂度',
+      '✗ 需要元数据支持',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `移动设备LFS的更新问题
+
+移动设备存储特点：
+- eMMC/UFS性能有限
+- 写入性能敏感
+- 功耗限制严格
+
+LFS更新开销：
+- 顺序写入优化
+- 但更新需要重写整个块
+- 写放大严重
+
+MedFS的目标：
+通过增量压缩降低更新开销。`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `元数据启用的增量压缩：
+
+关键洞察：
+- 文件更新通常只改变部分内容
+- 增量编码可大幅减少写入量
+- 元数据可指导压缩策略
+
+实现机制：
+- 识别更新中的变化部分
+- 只存储差异（delta）
+- 元数据记录位置映射
+
+优势：
+- 更新写入量大幅减少
+- 写放大小
+- 存储空间节省`,
+      },
+      {
+        title: '3. 性能评估',
+        content: `实验配置：
+- 移动设备：Android手机
+- 存储：UFS 3.1
+- 工作负载：移动应用负载
+
+性能测试：
+- 更新性能提升：显著
+- 写放大降低：50%+
+- 存储空间节省：30%+
+
+功耗测试：
+- 功耗降低：20%`,
+      },
+      {
+        title: '4. 局限性与适用场景',
+        content: `局限性：
+1. 读需要重组，延迟略增
+2. 增量计算需要CPU
+3. 实现复杂度增加
+4. 大文件完全重写收益小
+
+适用场景：
+- 移动设备存储
+- 小文件频繁更新
+- 功耗敏感场景
+- 存储空间紧张
+
+不适用场景：
+- 大文件一次性写入
+- 读密集型负载
+- CPU资源紧张`,
+      },
+    ],
+    performanceData: [
+      { metric: '更新性能提升', value: '显著' },
+      { metric: '写放大降低', value: '50%+' },
+      { metric: '空间节省', value: '30%+' },
+      { metric: '功耗降低', value: '20%' },
+    ],
   },
 ]
 
