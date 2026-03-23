@@ -268,7 +268,7 @@ export const atc2024Papers: PaperData[] = [
     authors: ['Network Optimization Team'],
     session: 'Networking',
     summary: '多租户数据中心网络的智能流量调度系统。',
-    archDiagram: '/images/jiagu-arch.png',
+    archDiagram: '/images/trafficopt-arch.png',
     keywords: ['Traffic Scheduling', 'Multi-Tenant', 'Datacenter Network'],
     contributions: ['设计流量预测模型', '实现动态调度策略', '网络利用率提升 30%'],
     pros: ['✓ 网络利用率高', '✓ 公平性好', '✓ 自适应强'],
