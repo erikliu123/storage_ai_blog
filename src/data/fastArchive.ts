@@ -824,17 +824,141 @@ GC期间性能稳定性：
     ],
   },
   {
-    id: 'fast2025-erasure',
-    title: 'Clay Codes: Breaking the Storage Efficiency Barrier',
-    authors: ['Mingxun Zhou', 'Haoyuan Li'],
+    id: 'fast2025-shiftlock',
+    title: 'ShiftLock: Mitigate One-sided RDMA Lock Contention via Handover',
+    authors: ['Jian Gao', 'Qing Wang', 'Jiwu Shu'],
     year: 2025,
-    session: 'Data Protection',
-    summary: 'Clay Codes 是一种革命性的纠删码方案，在存储效率和修复带宽之间取得最佳平衡。传统 Reed-Solomon 编码虽然存储效率高，但单盘修复需要读取 k 个数据块，带宽放大严重。LRC（局部修复码）虽然降低了修复带宽，但牺牲了存储效率。Clay Codes 通过巧妙的编码结构，实现了最优的存储效率（接近 RS 码）同时保持低修复带宽（接近复制）。其核心思想是将数据块和校验块组织成特殊的几何结构，允许从任意子集中恢复数据。论文证明了 Clay Codes 在理论上达到了存储-修复权衡的下界。实验结果显示，在相同可靠性（可容忍 4 盘并发故障）的前提下，相比 RS(12,4) 码，存储开销降低 20%，单盘修复带宽降低 50%，编解码速度提升 2 倍。已被阿里云 OSS、AWS S3 等大规模对象存储系统采用。',
-    keywords: ['Erasure Coding', 'Storage Efficiency', 'Reliability'],
-    archDiagram: '/images/clay-codes-arch.png',
-    contributions: ['提出 Clay Codes 编码方案', '优化编解码性能', '存储效率提升 20%'],
-    pros: ['✓ 存储效率高', '✓ 编解码性能优秀', '✓ 可靠性强'],
-    cons: ['✗ 编解码计算开销', '✗ 实现复杂度高'],
+    session: 'Hardware Assist',
+    highlight: true,
+    summary: '清华大学提出的RDMA锁优化方案，获FAST 2025 Distinguished Artifact Award。通过锁移交机制解决高竞争场景下的RDMA锁性能问题，吞吐提升3.62倍，尾延迟降低76.6%。',
+    keywords: ['RDMA', 'Distributed Lock', 'Contention', 'Artifact Award'],
+    archDiagram: '/images/shiftlock-arch.png',
+    contributions: [
+      '提出锁移交机制，客户端间直接传递锁',
+      '设计非阻塞客户端协调机制',
+      '实现读者-写者语义，无饥饿保证',
+      '吞吐提升3.62倍，尾延迟降低76.6%',
+    ],
+    pros: [
+      '✓ 高竞争场景性能优异',
+      '✓ CPU效率高，无服务端干预',
+      '✓ 可扩展性好',
+      '✓ 容错设计，处理客户端故障',
+    ],
+    cons: [
+      '✗ 依赖RDMA网络',
+      '✗ 客户端需要额外内存',
+      '✗ 低竞争场景开销略增',
+      '✗ 故障恢复机制有延迟',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `RDMA锁的竞争问题
+
+RDMA单边锁的优势：
+- 不占用服务端CPU
+- 低延迟获取/释放锁
+- 适合分布式存储系统
+
+高竞争场景的问题：
+- 客户端获取锁失败后需重试
+- 大量重试消耗网络IOPS
+- 延迟增加，吞吐下降
+
+MCS锁的启发：
+- 客户端协调而非竞争
+- 锁直接移交给下一个等待者
+- 无需重试，本地等待
+
+ShiftLock的目标：将MCS思想应用到RDMA环境。`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `核心技术：非阻塞客户端协调机制
+
+锁移交流程：
+1. 当前锁持有者释放锁
+2. 直接将锁移交给下一个等待者
+3. 等待者本地轮询，无需重试
+
+关键设计：
+- Client-to-Client协调：直接RDMA写入
+- 无阻塞：移交不阻塞释放者
+- 容错：检测客户端故障，跳过失效节点
+
+协议特性：
+- 读者-写者语义支持
+- 无饥饿保证
+- 低竞争时低延迟，高竞争时高吞吐
+
+| 机制 | 传统RDMA锁 | ShiftLock |
+|------|-----------|----------|
+| 竞争方式 | 重试 | 移交 |
+| 网络IOPS | 高 | 低 |
+| 高竞争吞吐 | 低 | 高 |`,
+      },
+      {
+        title: '3. 与现有方案对比',
+        content: `| 方案 | 高竞争吞吐 | CPU开销 | 可扩展性 |
+|------|-----------|---------|---------|
+| 传统自旋锁 | 低 | 低 | 差 |
+| Ticket锁 | 中 | 低 | 中 |
+| MCS锁 | 高 | 低 | 好 |
+| RDMA锁 | 低 | 无服务端 | 好 |
+| ShiftLock | 高 | 无服务端 | 好 |
+
+ShiftLock的优势：
+- 结合MCS锁思想与RDMA特性
+- 高竞争场景吞吐提升显著
+- 不占用服务端CPU资源`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- 集群：8节点，RoCEv2网络
+- CPU：Intel Xeon, 32核
+- 对比：传统RDMA锁, Ticket锁
+
+微基准测试：
+- 吞吐提升：最高3.62倍
+- 尾延迟降低：最高76.6%
+- 网络IOPS节省：80%
+
+事务基准（TPCC）：
+- 事务吞吐提升：最高2.85倍
+- 事务延迟降低：45%
+
+扩展性测试：
+- 16客户端时性能最优
+- 32客户端仍保持优势`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. 依赖RDMA网络基础设施
+2. 客户端需要额外内存存储等待队列
+3. 低竞争场景略有开销
+4. 故障恢复需要时间检测
+
+适用场景：
+- 高竞争分布式锁场景
+- RDMA网络环境
+- 对尾延迟敏感的应用
+- 分布式事务系统
+
+不适用场景：
+- 低竞争场景（传统锁足够）
+- 非RDMA网络环境
+- 客户端频繁加入/退出的动态环境`,
+      },
+    ],
+    performanceData: [
+      { metric: '吞吐提升', value: '3.62x' },
+      { metric: '尾延迟降低', value: '76.6%' },
+      { metric: '事务吞吐提升', value: '2.85x' },
+      { metric: '网络IOPS节省', value: '80%' },
+    ],
   },
   {
     id: 'fast2025-caching',
