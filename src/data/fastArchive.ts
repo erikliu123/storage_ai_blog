@@ -1100,17 +1100,138 @@ ML应用测试：
     cons: ['✗ 性能仍有提升空间', '✗ 某些场景稳定性问题'],
   },
   {
-    id: 'fast2025-smartssd',
-    title: 'SmartSSD: Computational Storage with FPGA Acceleration',
-    authors: ['Xilinx Storage Team'],
+    id: 'fast2025-aegonkv',
+    title: 'AegonKV: A High Bandwidth, Low Tail Latency, and Low Storage Cost KV-Separated LSM Store with SmartSSD-based GC Offloading',
+    authors: ['Zhuohui Duan', 'Hao Feng', 'Haikun Liu', 'Xiaofei Liao', 'Hai Jin', 'Bangyu Li'],
     year: 2025,
-    session: 'Computational Storage',
-    summary: 'Samsung SmartSSD 是计算存储的里程碑产品，在 SSD 内部集成 FPGA 加速器，实现了数据处理的下推（pushdown）。传统存储架构中，CPU 需要从 SSD 读取大量原始数据，在内存中处理，造成严重的 CPU 瓶颈和带宽浪费。SmartSSD 允许用户将数据处理逻辑（如数据过滤、聚合、解压缩、加密）卸载到 SSD 内部的 FPGA 执行，仅返回处理结果。系统提供了开放的 FPGA 开发环境，用户可使用 OpenCL 或 VHDL 编写自定义加速器。论文详细介绍了架构设计：FPGA-NAND 接口、DMA 引擎、主机通信协议、编程模型。实验场景包括：数据库查询（WHERE 子句下推）、视频转码（在 SSD 内完成格式转换）、基因序列分析（本地比对）。结果显示，CPU 负载降低 60%，数据传输量减少 80%，端到端延迟降低 50%，能耗效率提升 3 倍。开创了计算存储的商业化先河。',
-    keywords: ['SmartSSD', 'FPGA', 'Computational Storage'],
-    archDiagram: '/images/smartssd-arch.png',
-    contributions: ['设计 FPGA 加速存储架构', '实现数据内过滤', 'CPU 负载降低 60%'],
-    pros: ['✓ 降低 CPU 负载', '✓ 减少数据传输', '✓ 能效比高'],
-    cons: ['✗ FPGA 开发门槛高', '✗ 硬件成本高'],
+    session: 'Hardware Assist',
+    summary: '华中科技大学提出的KV分离LSM存储系统，利用SmartSSD实现GC卸载。同时优化吞吐、尾延迟和存储成本，吞吐提升1.28-3.3倍，尾延迟降低37%-66%。',
+    keywords: ['KV Separation', 'LSM-Tree', 'SmartSSD', 'Garbage Collection'],
+    archDiagram: '/images/aegonkv-arch.png',
+    contributions: [
+      '提出SmartSSD-based GC卸载机制',
+      '设计卸载友好的数据结构',
+      '实现异步GC，不竞争前台IO',
+      '吞吐提升3.3倍，尾延迟降低66%',
+    ],
+    pros: [
+      '✓ GC不占用主机CPU和带宽',
+      '✓ 同时优化三个指标',
+      '✓ 存储开销降低15%-85%',
+      '✓ 尾延迟显著降低',
+    ],
+    cons: [
+      '✗ 需要SmartSSD硬件支持',
+      '✗ 卸载逻辑复杂',
+      '✗ 故障恢复更复杂',
+      '✗ 硬件成本较高',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `KV分离系统的GC困境
+
+KV分离的优势：
+- 减少LSM的写放大
+- 大Value不参与Compaction
+- 适合大Value场景
+
+Value区GC的问题：
+- 需要识别失效Value
+- 需要搬迁有效Value
+- 与前台IO竞争资源
+
+现有方案的困境（三元悖论）：
+- 高吞吐 → 高尾延迟
+- 低延迟 → 高空间开销
+- 低空间 → GC频繁
+
+AegonKV的目标：同时满足三个要求。`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `核心技术：SmartSSD-based GC Offloading
+
+卸载机制：
+- GC逻辑运行在SmartSSD的FPGA上
+- 不占用主机CPU和IO带宽
+- 异步执行，不阻塞前台
+
+卸载友好的数据结构：
+- Value索引设计支持FPGA高效遍历
+- 位图标记有效/无效Value
+- 并行搬迁数据
+
+执行流程：
+1. 主机标记失效Value
+2. FPGA执行GC（扫描、搬迁）
+3. 更新索引，释放空间
+
+| 指标 | 传统GC | AegonKV |
+|------|-------|---------|
+| CPU占用 | 高 | 低 |
+| IO竞争 | 严重 | 无 |
+| 尾延迟 | 高 | 低 |`,
+      },
+      {
+        title: '3. 与现有系统对比',
+        content: `| 系统 | 吞吐 | 尾延迟 | 空间开销 |
+|------|-----|-------|---------|
+| WiscKey | 中 | 高 | 高 |
+| BlobDB | 中 | 中 | 中 |
+| Titan | 中 | 中 | 高 |
+| AegonKV | 高 | 低 | 低 |
+
+AegonKV的优势：
+- GC完全卸载到FPGA
+- 解决三元悖论
+- 三个指标同时最优`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- SmartSSD：Samsung SmartSSD
+- 对比：WiscKey, BlobDB, Titan
+
+吞吐测试：
+- 吞吐提升：1.28-3.3倍
+- YCSB-A负载：+2.5倍
+- YCSB-F负载：+3.3倍
+
+尾延迟测试：
+- P99延迟降低：37%-66%
+- GC期间延迟波动降低：80%
+
+空间开销：
+- 存储开销降低：15%-85%
+- GC效率提升：2倍`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. 需要SmartSSD硬件支持
+2. FPGA编程复杂
+3. 卸载逻辑调试困难
+4. 硬件成本增加
+
+适用场景：
+- 大Value KV存储（推荐）
+- 写密集型负载
+- 对尾延迟敏感的应用
+- 有SmartSSD的环境
+
+不适用场景：
+- 小Value场景（KV分离本身收益小）
+- 无SmartSSD硬件
+- 成本敏感型部署`,
+      },
+    ],
+    performanceData: [
+      { metric: '吞吐提升', value: '1.28-3.3x' },
+      { metric: '尾延迟降低', value: '37%-66%' },
+      { metric: '空间开销降低', value: '15%-85%' },
+      { metric: 'GC效率提升', value: '2x' },
+    ],
   },
   {
     id: 'fast2025-keyvalue',
