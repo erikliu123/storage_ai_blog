@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { BookOpen, GitBranch, Search, Users, Award, Bug, Zap, AlertOctagon, ChevronDown, Database, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useRef, useEffect } from 'react'
+import { SearchModal } from '@/components/SearchModal'
 
 const navItems = [
   { href: '/', label: '论文', icon: BookOpen },
@@ -14,6 +15,7 @@ const navItems = [
 const moreItems = [
   { href: '/asplos2025', label: 'ASPLOS', icon: Award },
   { href: '/sigmod2025', label: 'SIGMOD', icon: Award },
+  { href: '/nvme-manual', label: 'NVMe 手册', icon: BookOpen },
   { href: '/distributed-storage', label: '分布式存储', icon: Database },
   { href: '/rocksdb-special', label: 'RocksDB 专题', icon: Database },
   { href: '/opensource', label: '开源存储库', icon: Database },
@@ -26,7 +28,6 @@ const moreItems = [
 
 export function Navbar() {
   const location = useLocation()
-  const [searchOpen, setSearchOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const moreRef = useRef<HTMLDivElement>(null)
 
@@ -121,7 +122,10 @@ export function Navbar() {
 
         {/* Search */}
         <button
-          onClick={() => setSearchOpen(!searchOpen)}
+          onClick={() => {
+            const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true })
+            document.dispatchEvent(event)
+          }}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
         >
           <Search className="w-3.5 h-3.5" />
@@ -130,18 +134,7 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Search bar expand */}
-      {searchOpen && (
-        <div className="border-t border-border bg-background/95 px-6 py-3">
-          <input
-            autoFocus
-            type="text"
-            placeholder="搜索论文标题、关键词..."
-            className="w-full bg-surface border border-border rounded-lg px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/30"
-            onKeyDown={(e) => e.key === 'Escape' && setSearchOpen(false)}
-          />
-        </div>
-      )}
+      <SearchModal />
     </header>
   )
 }

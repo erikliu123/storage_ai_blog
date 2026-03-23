@@ -20,6 +20,7 @@ import StorageFaults from '@/pages/StorageFaults'
 import OpenSourceProjects from '@/pages/OpenSourceProjects'
 import DistributedStorageComparison from '@/pages/DistributedStorageComparison'
 import RocksDBSpecial from '@/pages/RocksDBSpecial'
+import NVMeManual from '@/pages/NVMeManual'
 
 function App() {
   return (
@@ -38,6 +39,7 @@ function App() {
         <Route path="/sigmod2025" element={<Sigmod2025 />} />
         <Route path="/distributed-storage" element={<DistributedStorageComparison />} />
         <Route path="/rocksdb-special" element={<RocksDBSpecial />} />
+        <Route path="/nvme-manual" element={<NVMeManual />} />
         <Route path="/linux-bugfix" element={<LinuxBugfix />} />
         <Route path="/spdk" element={<SpdkUpdates />} />
         <Route path="/faults" element={<StorageFaults />} />
