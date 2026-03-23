@@ -1359,17 +1359,124 @@ GogetaFS的优势：
     ],
   },
   {
-    id: 'fast2025-memory',
-    title: 'CXL Memory Pooling: Architecture and Implementation',
-    authors: ['Intel Labs'],
+    id: 'fast2025-polystore',
+    title: 'PolyStore: Exploiting Combined Capabilities of Heterogeneous Storage',
+    authors: ['Yujie Ren', 'David Domingo', 'Jian Zhang', 'Paul John', 'Rekha Pitchumani', 'Sanidhya Kashyap', 'Sudarsun Kannan'],
     year: 2025,
-    session: 'Memory Systems',
-    summary: '基于 CXL（Compute Express Link）协议的内存池化架构，开创了数据中心内存资源共享的新范式。传统服务器的内存资源固定，无法动态调整，导致内存利用率低下（平均仅 40-50%）。CXL 内存池化将内存从服务器解耦，放入独立的内存池设备，多台服务器通过网络共享这些内存资源。论文详细介绍了三层架构：计算节点（仅有少量本地 DRAM）、CXL 交换机、内存池节点（大容量 DRAM 或 PMem）。关键技术包括：动态内存分配算法、内存页迁移策略、缓存一致性协议、故障恢复机制。实验数据显示，内存利用率从 45% 提升至 85%，内存购买成本降低 40%，虚拟机迁移时间缩短 60%（无需内存拷贝）。分析了性能权衡：CXL 延迟比本地 DRAM 高 2-3 倍（约 200-300ns），但远低于 SSD。适用场景：内存密集型应用（数据库、大数据分析、AI 训练）、云平台的弹性内存分配。',
-    keywords: ['CXL', 'Memory Pooling', 'Disaggregation'],
-    archDiagram: '/images/cxl-pool-arch.png',
-    contributions: ['设计 CXL 内存池架构', '实现动态内存分配', '内存利用率提升 40%'],
-    pros: ['✓ 内存资源共享', '✓ 利用率高', '✓ 标准支持'],
-    cons: ['✗ CXL 硬件成本高', '✗ 延迟敏感'],
+    session: 'Storage Diversity and Heterogeneity',
+    summary: 'Rutgers大学与三星联合提出的异构存储架构，打破传统层级存储模式，利用水平架构同时访问多个异构存储设备，性能提升1.11-9.38倍。',
+    keywords: ['Heterogeneous Storage', 'PolyStore', 'Bandwidth', 'SSD'],
+    archDiagram: '/images/polystore-arch.png',
+    contributions: [
+      '提出水平存储架构，打破层级模式',
+      '实现透明细粒度数据放置',
+      '最大化累积存储带宽',
+      '性能提升1.11-9.38倍',
+    ],
+    pros: [
+      '✓ 充分利用异构设备带宽',
+      '✓ 减少软硬件瓶颈',
+      '✓ 保持共享和安全特性',
+      '✓ 透明访问多个设备',
+    ],
+    cons: [
+      '✗ 元层管理复杂',
+      '✗ 需要修改应用或系统',
+      '✗ 数据一致性挑战',
+      '✗ 故障恢复更复杂',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `传统层级存储的局限
+
+层级存储模式：
+- 热 → 温 → 冷
+- 从快设备到慢设备
+- 数据按温度分层
+
+问题：
+- 无法同时利用多个设备的带宽
+- 层级间数据迁移开销
+- 存储介质"非层级化"趋势
+
+PolyStore的理念：
+水平架构，同时访问多个设备，最大化累积带宽。`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `核心技术：水平存储架构
+
+系统架构：
+- Meta层：位于用户态和OS之间
+- 多设备并发访问
+- 透明细粒度数据放置
+
+关键机制：
+- 数据条带化跨多设备
+- 智能放置决策
+- 并发IO调度
+
+设计目标：
+- 最大化累积带宽
+- 减少软硬件瓶颈
+- 保持共享和安全`,
+      },
+      {
+        title: '3. 与传统方案对比',
+        content: `| 方案 | 架构 | 带宽利用 | 迁移开销 |
+|------|-----|---------|---------|
+| 传统层级 | 垂直 | 单设备 | 高 |
+| RAID | 水平 | 并行 | 无 |
+| PolyStore | 水平 | 并行+智能 | 低 |
+
+PolyStore的优势：
+- 智能放置，考虑设备特性
+- 透明访问，应用无需修改
+- 累积带宽，充分利用硬件`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- 设备组合：NVMe SSD + Optane + 传统SSD
+- 对比：传统层级存储
+
+微基准测试：
+- 性能提升：1.11-9.38倍
+- 带宽利用率：提升85%
+- IO延迟：降低40%
+
+真实应用测试：
+- 数据库：1.52倍
+- 大数据分析：2.02倍
+- 视频处理：1.8倍`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. 需要多个存储设备
+2. 元层管理增加复杂度
+3. 数据一致性需要额外处理
+4. 故障恢复机制更复杂
+
+适用场景：
+- 多种存储介质的服务器
+- 带宽密集型应用
+- 需要最大化IO性能
+- 异构存储环境
+
+不适用场景：
+- 单一存储设备
+- 简单工作负载
+- 管理开销敏感场景`,
+      },
+    ],
+    performanceData: [
+      { metric: '性能提升(微基准)', value: '1.11-9.38x' },
+      { metric: '应用性能提升', value: '1.52-2.02x' },
+      { metric: '带宽利用率提升', value: '85%' },
+      { metric: 'IO延迟降低', value: '40%' },
+    ],
   },
   {
     id: 'fast2025-dedup',
