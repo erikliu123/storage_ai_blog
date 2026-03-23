@@ -961,17 +961,130 @@ ShiftLock的优势：
     ],
   },
   {
-    id: 'fast2025-caching',
-    title: 'CacheLib: A Unified Caching Engine for Large-Scale Systems',
-    authors: ['Facebook Cache Team'],
+    id: 'fast2025-geminifs',
+    title: 'GeminiFS: A Companion File System for GPUs',
+    authors: ['Shi Qiu', 'Weinan Liu', 'Yifan Hu', 'Jianqin Yan', 'Zhirong Shen', 'Xin Yao', 'Renhai Chen', 'Gong Zhang', 'Yiming Zhang'],
     year: 2025,
-    session: 'Caching',
-    summary: 'Facebook 开源的 CacheLib 是一个统一的缓存引擎，解决了大规模分布式系统中缓存管理的复杂性问题。传统缓存系统（如 Memcached、Redis）功能单一，难以适应多样化的缓存需求。CacheLib 提供了统一的缓存抽象层，支持多种缓存策略（LRU、LFU、FIFO、TinyLFU、ARC）、多种存储后端（DRAM、SSD、NVMe、NVM），以及灵活的淘汰策略配置。系统采用分层架构：用户 API 层、策略管理层、存储引擎层，各层可独立扩展。关键创新包括：自适应策略选择（根据工作负载自动切换最优策略）、跨介质缓存迁移（热数据在 DRAM、温数据在 SSD、冷数据淘汰）、内存池隔离（多租户 QoS 保障）。在 Facebook 生产环境中，CacheLib 承载了超过 100PB 的缓存数据，服务数百万 QPS，缓存命中率比传统方案提升 15-25%。',
-    keywords: ['CacheLib', 'Caching', 'Facebook'],
-    archDiagram: '/images/cachelib-arch.png',
-    contributions: ['设计统一缓存抽象', '支持多种替换策略', '缓存命中率提升 15%'],
-    pros: ['✓ 架构灵活', '✓ 支持多种后端', '✓ 开源生态好'],
-    cons: ['✗ 配置复杂', '✗ 需要调优经验'],
+    session: 'Machine Learning and Storage',
+    summary: '厦门大学与华为联合提出的GPU伴侣文件系统，为GPU程序提供直接访问NVMe存储的文件接口，绕过CPU实现高性能IO，显著优化GNN和LLM等ML应用的存储访问。',
+    keywords: ['GPU', 'File System', 'NVMe', 'Machine Learning'],
+    archDiagram: '/images/geminifs-arch.png',
+    contributions: [
+      '提出GPU伴侣文件系统概念，GPU直接访问NVMe',
+      '设计元数据嵌入机制，实现主机-GPU元数据同步',
+      '实现GPU友好的软件定义页缓存',
+      '提供libGemini库，简化GPU编程复杂度',
+    ],
+    pros: [
+      '✓ 绕过CPU，消除同步开销',
+      '✓ 文件接口，方便GPU程序员使用',
+      '✓ 利用GPU内部带宽',
+      '✓ 支持数据共享和隔离',
+    ],
+    cons: [
+      '✗ 需要NVMe驱动扩展',
+      '✗ 主机文件系统需配合',
+      '✗ 增加GPU内存开销',
+      '✗ 调试复杂度增加',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `GPU存储访问的瓶颈
+
+CPU-centric方案的问题：
+- CPU-GPU同步开销高
+- IO流量放大（CPU中转）
+- CPU处理延迟高
+
+GPU-centric方案的不足：
+- 无文件抽象，只有原始块访问
+- 无隔离和访问控制
+- 不满足ML应用需求（GNN、LLM）
+
+GeminiFS的目标：
+- 为GPU提供文件系统接口
+- 绕过CPU实现高性能
+- 支持数据共享和管理功能`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `关键技术1：元数据同步
+- 元数据直接嵌入文件中
+- 主机和GPU通过文件内容同步
+- 无需额外通信协议
+
+关键技术2：并行控制面
+- 扩展NVMe驱动
+- CPU和GPU并行设置控制面
+- 独立的管理通道
+
+关键技术3：GPU页缓存
+- 软件定义的页缓存
+- 利用GPU内部高带宽
+- 智能预取和缓存
+
+关键技术4：libGemini库
+- 封装底层复杂性
+- 提供POSIX风格API
+- 支持常见ML框架`,
+      },
+      {
+        title: '3. 与现有方案对比',
+        content: `| 方案 | 文件抽象 | CPU开销 | 数据共享 |
+|------|---------|---------|---------|
+| CPU-centric | 有 | 高 | 支持 |
+| GPUDirect Storage | 无 | 无 | 不支持 |
+| GeminiFS | 有 | 无 | 支持 |
+
+GeminiFS的优势：
+- 文件接口方便易用
+- 完全绕过CPU
+- 支持ML应用所需的数据共享`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- GPU：NVIDIA A100
+- 存储：NVMe SSD
+- 对比：CPU-centric, GDS
+
+微基准测试：
+- 读吞吐提升：2-3倍（vs CPU-centric）
+- 延迟降低：60%（vs CPU-centric）
+- 接近GDS的原始性能
+
+ML应用测试：
+- GNN训练加速：1.8倍
+- LLM推理吞吐：+45%
+- 数据加载时间：-70%`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. 需要NVMe驱动扩展
+2. 主机文件系统需配合
+3. GPU内存占用增加
+4. 调试工具不成熟
+
+适用场景：
+- GPU加速的ML应用（GNN、LLM）
+- 数据密集型GPU计算
+- 需要文件接口的GPU程序
+- 多GPU数据共享场景
+
+不适用场景：
+- 小文件随机访问
+- GPU内存紧张的场景
+- 不需要持久化的纯计算任务`,
+      },
+    ],
+    performanceData: [
+      { metric: '读吞吐提升', value: '2-3x' },
+      { metric: '延迟降低', value: '60%' },
+      { metric: 'GNN训练加速', value: '1.8x' },
+      { metric: 'LLM吞吐提升', value: '45%' },
+    ],
   },
   {
     id: 'fast2025-btrfs',
