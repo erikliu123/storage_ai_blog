@@ -1234,17 +1234,129 @@ AegonKV的优势：
     ],
   },
   {
-    id: 'fast2025-keyvalue',
-    title: 'RocksDB at Scale: Lessons from Production Deployments',
-    authors: ['Meta Database Team'],
+    id: 'fast2025-gogetafs',
+    title: 'Don\'t Maintain Twice, It\'s Alright: Merged Metadata Management in Deduplication File System with GogetaFS',
+    authors: ['Yanqi Pan', 'Wen Xia', 'Erci Xu', 'Hao Huang', 'Xiangyu Zou', 'Shiyi Li'],
     year: 2025,
-    session: 'Key-Value Stores',
-    summary: 'Meta 分享了 RocksDB 在超大规模生产环境中十年的部署经验，涵盖性能调优、故障排查、架构演进等方方面面。RocksDB 作为 Facebook 开源的 LSM-Tree 存储引擎，承载了 Meta 几乎所有核心业务的数据存储，包括社交图谱、消息系统、广告平台、实时分析等。论文详细介绍了生产环境的关键挑战：Compaction 对前台 IO 的影响、写放大导致的寿命问题、内存管理的复杂性、多租户隔离需求。分享了实用的调优技巧：层级大小比例优化（从 10 调整到 8）、压缩算法选择（Snappy vs ZSTD）、内存分配策略（Jemalloc vs TCMalloc）、多线程 Compaction 配置。深入分析了典型故障案例：Compaction 积压导致的读性能下降、SSTable 碎片化问题、MemTable 内存泄漏。提出了架构改进建议：BlobDB 键值分离、Tiered Compaction、User-Defined Compaction。对正在部署 RocksDB 的团队有极高参考价值。',
-    keywords: ['RocksDB', 'LSM-Tree', 'Production'],
-    archDiagram: '/images/rocksdb-prod-arch.png',
-    contributions: ['总结生产部署经验', '分享性能调优技巧', '提出改进建议'],
-    pros: ['✓ 实践经验丰富', '✓ 可借鉴性强', '✓ 开源贡献'],
-    cons: ['✗ 特定场景优化', '✗ 需要深入理解'],
+    session: 'Compression and Deduplication',
+    highlight: true,
+    summary: '哈尔滨工业大学与阿里联合提出的去重文件系统，获Distinguished Artifact Award。合并元数据管理，将指纹-物理映射与逻辑-物理映射合并，元数据开销降低38%。',
+    keywords: ['Deduplication', 'File System', 'Metadata', 'Artifact Award'],
+    archDiagram: '/images/gogetafs-arch.png',
+    contributions: [
+      '提出LFP映射，合并逻辑-指纹-物理映射',
+      '单次IO持久化所有元数据',
+      '兼容现有文件系统语义',
+      '元数据维护开销降低38%',
+    ],
+    pros: [
+      '✓ 消除重复元数据维护',
+      '✓ 崩溃一致性开销降低',
+      '✓ 内存效率高',
+      '✓ 兼容现有文件系统',
+    ],
+    cons: [
+      '✗ 需要修改文件系统',
+      '✗ 指纹嵌入元数据增加开销',
+      '✗ 恢复逻辑更复杂',
+      '✗ 需要非加密哈希支持',
+    ],
+    sections: [
+      {
+        title: '1. 问题背景与动机',
+        content: `去重文件系统的元数据开销
+
+传统DedupFS的元数据维护：
+- 文件系统维护：逻辑-物理(L2P)映射
+- 去重系统维护：指纹-物理(F2P)映射
+- 两套映射独立维护，开销加倍
+
+问题根源：
+- F2P映射需要独立的崩溃一致性保证
+- 每次写IO需要更新两套元数据
+- 开销可达IO路径的38%
+
+关键洞察：
+L2P和F2P可以合并为LFP（逻辑-指纹-物理）映射，一次IO完成所有更新。`,
+      },
+      {
+        title: '2. 核心技术设计',
+        content: `核心技术：LFP映射
+
+传统方案：
+逻辑地址 → 物理地址 (文件系统维护)
+指纹 → 物理地址 (去重系统维护)
+
+GogetaFS方案：
+逻辑地址 → 指纹 → 物理地址 (统一维护)
+
+实现机制：
+- 将指纹嵌入文件的元数据
+- 文件系统更新时同时更新指纹
+- 单次IO保证一致性
+
+关键优化：
+- 非加密哈希加速指纹计算
+- 内存高效的索引结构
+- 兼容POSIX语义`,
+      },
+      {
+        title: '3. 与现有系统对比',
+        content: `| 系统 | 元数据维护 | 崩溃一致性 | 开销 |
+|------|-----------|-----------|-----|
+| 传统DedupFS | 两套映射 | 双重日志 | 高 |
+| GogetaFS | 单套LFP | 单次日志 | 低 |
+
+GogetaFS的优势：
+- 元数据维护开销降低38%
+- 崩溃恢复更简单
+- 内存占用更少`,
+      },
+      {
+        title: '4. 性能评估',
+        content: `实验配置：
+- 存储：PMem + NVMe SSD
+- 对比：传统DedupFS, RestFS
+
+元数据开销测试：
+- IO路径开销降低：38%
+- 元数据写入次数：减少50%
+
+整体性能：
+- 写吞吐提升：1.5-2倍
+- 读延迟降低：20%
+- 内存占用降低：30%
+
+工作负载测试：
+- VM镜像存储：空间节省70%
+- 备份场景：写入速度+80%`,
+      },
+      {
+        title: '5. 局限性与适用场景',
+        content: `局限性：
+1. 需要修改底层文件系统
+2. 指纹嵌入增加元数据大小
+3. 依赖非加密哈希（安全性考虑）
+4. 恢复逻辑需要额外处理
+
+适用场景：
+- 高重复率场景（VM镜像、备份）
+- 使用PMem或低延迟SSD
+- 对写入性能敏感
+- 需要节省存储空间
+
+不适用场景：
+- 加密数据（无法去重）
+- 低重复率数据
+- 安全敏感场景（非加密哈希）`,
+      },
+    ],
+    performanceData: [
+      { metric: '元数据开销降低', value: '38%' },
+      { metric: '写吞吐提升', value: '1.5-2x' },
+      { metric: '空间节省', value: '70%' },
+      { metric: '内存占用降低', value: '30%' },
+    ],
   },
   {
     id: 'fast2025-memory',
