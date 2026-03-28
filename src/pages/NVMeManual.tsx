@@ -179,10 +179,56 @@ const rwCommandFields = [
   },
 ]
 
+// Get Log Page command detailed fields
+const getLogPageFields = [
+  {
+    dword: 'DW10',
+    fields: [
+      { bits: '[07:00]', name: 'LID (Log Identifier)', description: '日志标识符，定义要读取的日志类型（如 0x00=Reserved, 0x01=Error, 0x02=SMART/Health, 0x03=FW Slot, 0x04=Changed Namespace List 等）' },
+      { bits: '[15:08]', name: 'Reserved', description: '保留' },
+      { bits: '[31:16]', name: 'NUMD (Number of Dwords)', description: '要传输的数据量（以 DWORD 为单位，0-based）。例如：NUMD=0xFF 表示传输 256 个 DWORD（1024 字节）' },
+    ]
+  },
+  {
+    dword: 'DW11',
+    fields: [
+      { bits: '[00]', name: 'RGO (Return Good)', description: '0b=仅当 LID 有效时返回数据，1b=即使 LID 无效也返回良好完成（NVMe 1.4+）' },
+      { bits: '[07:01]', name: 'Reserved', description: '保留' },
+      { bits: '[15:08]', name: 'LSP (Log Specific Field)', description: '日志特定字段，含义取决于 LID。例如 SMART/Health 日志：000b=当前值，001b=累计值' },
+      { bits: '[31:16]', name: 'LPOL (Log Page Offset Low)', description: '日志页面偏移量的低 16 位（以 DWORD 为单位），用于读取大型日志页面的不同部分' },
+    ]
+  },
+  {
+    dword: 'DW12',
+    fields: [
+      { bits: '[31:00]', name: 'LPOL (Log Page Offset High)', description: '日志页面偏移量的高 32 位，与 DW11.LPOL 组合形成 48 位偏移量' },
+    ]
+  },
+  {
+    dword: 'DW13',
+    fields: [
+      { bits: '[31:00]', name: 'CSI (Command Set Identifier)', description: '命令集标识符（NVMe 2.0+），指定要查询的命令集。0h=NVM, 1h=ZNS, 2h=Key Value' },
+    ]
+  },
+  {
+    dword: 'DW14',
+    fields: [
+      { bits: '[31:00]', name: 'UUID Index', description: 'UUID 索引（NVMe 1.1+），当 LID=0x0E（Vendor Specific）时，指定厂商特定的 UUID' },
+    ]
+  },
+  {
+    dword: 'DW15',
+    fields: [
+      { bits: '[00]', name: 'OT (Offset Type)', description: '0b=LPOL 以 DWORD 为单位，1b=LPOL 以字节为单位（NVMe 2.0+）' },
+      { bits: '[31:01]', name: 'Reserved', description: '保留' },
+    ]
+  },
+]
+
 export default function NVMeManual() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
-  const [activeTab, setActiveTab] = useState<'opcodes' | 'structure' | 'prp-sgl'>('opcodes')
+  const [activeTab, setActiveTab] = useState<'opcodes' | 'structure' | 'prp-sgl' | 'get-log' | 'metadata'>('opcodes')
 
   // Filter opcodes by search query
   const filteredOpcodes = nvmeOpcodes
@@ -214,11 +260,11 @@ export default function NVMeManual() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-2 border-b border-border">
+      <div className="mb-6 flex gap-2 border-b border-border overflow-x-auto">
         <button
           onClick={() => setActiveTab('opcodes')}
           className={cn(
-            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
             activeTab === 'opcodes'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -230,7 +276,7 @@ export default function NVMeManual() {
         <button
           onClick={() => setActiveTab('structure')}
           className={cn(
-            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
             activeTab === 'structure'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -242,7 +288,7 @@ export default function NVMeManual() {
         <button
           onClick={() => setActiveTab('prp-sgl')}
           className={cn(
-            'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
             activeTab === 'prp-sgl'
               ? 'border-primary text-primary'
               : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -250,6 +296,30 @@ export default function NVMeManual() {
         >
           <HardDrive className="w-4 h-4 inline mr-2" />
           PRP/SGL 原理
+        </button>
+        <button
+          onClick={() => setActiveTab('get-log')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
+            activeTab === 'get-log'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <BookOpen className="w-4 h-4 inline mr-2" />
+          Get Log Page 详解
+        </button>
+        <button
+          onClick={() => setActiveTab('metadata')}
+          className={cn(
+            'px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
+            activeTab === 'metadata'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          )}
+        >
+          <Layers className="w-4 h-4 inline mr-2" />
+          Metadata Pointer
         </button>
       </div>
 
@@ -744,6 +814,378 @@ export default function NVMeManual() {
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* Get Log Page Tab */}
+      {activeTab === 'get-log' && (
+        <>
+          <section className="mb-10">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Get Log Page 命令详解 - 逐位解析
+            </h2>
+            
+            <div className="card-paper rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-bold mb-4">Get Log Page 命令概述</h3>
+              <div className="text-xs text-foreground/80 space-y-3">
+                <p><strong className="text-primary">用途：</strong>Get Log Page 是 NVMe 管理命令中最常用的命令之一，用于获取 SSD 的各种日志信息，包括错误日志、SMART/Health 信息、固件状态等。</p>
+                <p><strong className="text-primary">命令类型：</strong>Admin Command（管理员命令），需要在 Admin Submission Queue 中提交</p>
+                <p><strong className="text-primary">返回数据：</strong>日志页面数据通过 PRP/SGL 指定的数据缓冲区返回</p>
+              </div>
+            </div>
+
+            {/* Common Log Identifiers */}
+            <div className="card-paper rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-bold mb-4">常见 LID（Log Identifier）值</h3>
+              <table className="w-full text-xs">
+                <thead className="bg-surface-raised border-b border-border">
+                  <tr>
+                    <th className="text-left py-3 px-4 font-semibold">LID</th>
+                    <th className="text-left py-3 px-4 font-semibold">日志名称</th>
+                    <th className="text-left py-3 px-4 font-semibold">描述</th>
+                    <th className="text-left py-3 px-4 font-semibold">大小</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-primary">0x01</td>
+                    <td className="py-3 font-medium">Error Information</td>
+                    <td className="py-3 text-muted-foreground">错误信息日志，记录最近的命令错误</td>
+                    <td className="py-3 font-mono">64B × entries</td>
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-primary">0x02</td>
+                    <td className="py-3 font-medium">SMART/Health</td>
+                    <td className="py-3 text-muted-foreground">SMART 和健康信息，包括温度、寿命、介质磨损等</td>
+                    <td className="py-3 font-mono">512B</td>
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-primary">0x03</td>
+                    <td className="py-3 font-medium">Firmware Slot</td>
+                    <td className="py-3 text-muted-foreground">固件插槽信息，显示当前和可用的固件版本</td>
+                    <td className="py-3 font-mono">512B</td>
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-primary">0x04</td>
+                    <td className="py-3 font-medium">Changed Namespace List</td>
+                    <td className="py-3 text-muted-foreground">已更改的命名空间列表</td>
+                    <td className="py-3 font-mono">可变</td>
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-primary">0x05</td>
+                    <td className="py-3 font-medium">Command Effects Log</td>
+                    <td className="py-3 text-muted-foreground">命令效果日志，显示哪些命令被支持</td>
+                    <td className="py-3 font-mono">1KB</td>
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-primary">0x06</td>
+                    <td className="py-3 font-medium">Device Self-Test</td>
+                    <td className="py-3 text-muted-foreground">设备自测试结果</td>
+                    <td className="py-3 font-mono">512B</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-mono text-primary">0x0E</td>
+                    <td className="py-3 font-medium">Vendor Specific</td>
+                    <td className="py-3 text-muted-foreground">厂商特定日志，需要配合 UUID Index 使用</td>
+                    <td className="py-3 font-mono">可变</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* DW10-DW15 detailed breakdown */}
+            <div className="space-y-4">
+              {getLogPageFields.map(section => (
+                <div key={section.dword} className="card-paper rounded-xl overflow-hidden">
+                  <div className="bg-surface-raised px-4 py-3 border-b border-border">
+                    <h3 className="text-sm font-bold text-primary">{section.dword}</h3>
+                  </div>
+                  <div className="p-4">
+                    <table className="w-full text-xs">
+                      <thead className="text-muted-foreground">
+                        <tr>
+                          <th className="text-left py-2 font-medium w-32">位范围</th>
+                          <th className="text-left py-2 font-medium">字段名称</th>
+                          <th className="text-left py-2 font-medium">详细说明</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {section.fields.map((field, idx) => (
+                          <tr key={idx} className="border-t border-border/50">
+                            <td className="py-3 font-mono text-primary">{field.bits}</td>
+                            <td className="py-3 font-medium">{field.name}</td>
+                            <td className="py-3 text-muted-foreground">{field.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Usage example */}
+            <div className="card-paper rounded-xl p-6 mt-6">
+              <h3 className="text-sm font-bold mb-4">Get Log Page 使用示例</h3>
+              <div className="text-xs font-mono space-y-4">
+                <div className="bg-surface-raised rounded p-4">
+                  <p className="text-primary font-semibold mb-2">示例 1: 读取 SMART/Health 日志</p>
+                  <pre className="overflow-x-auto text-foreground/80 whitespace-pre-wrap">
+{`NVMe_GetLogPage_Command cmd = {0};
+cmd.CID = 1;                      // 命令 ID
+cmd.NSID = 0xFFFFFFFF;            // 全局日志，不指定 NSID
+cmd.PRPr1 = 0x1000_1000;          // 数据缓冲区物理地址
+cmd.PRPr2 = 0;                    // 单页传输
+cmd.DW10 = 0x02 | (0xFF << 16);   // LID=0x02 (SMART), NUMD=255 (1024 字节)
+cmd.DW11 = 0;                     // RGO=0, LSP=0, LPOL=0
+cmd.DW12 = 0;                     // LPOL 高位
+cmd.DW13 = 0;                     // CSI=0 (NVM 命令集)
+cmd.DW14 = 0;                     // UUID Index=0
+cmd.DW15 = 0;                     // OT=0 (DWORD 单位)`}
+                  </pre>
+                </div>
+                <div className="bg-surface-raised rounded p-4">
+                  <p className="text-primary font-semibold mb-2">示例 2: 读取错误信息日志</p>
+                  <pre className="overflow-x-auto text-foreground/80 whitespace-pre-wrap">
+{`NVMe_GetLogPage_Command cmd = {0};
+cmd.CID = 2;
+cmd.NSID = 0xFFFFFFFF;
+cmd.PRPr1 = 0x1000_2000;          // 数据缓冲区
+cmd.PRPr2 = 0x1000_3000;          // PRP List（大日志）
+cmd.DW10 = 0x01 | (0x1FF << 16);  // LID=0x01 (Error), NUMD=511 (2KB)
+cmd.DW11 = 0;                     // 从头开始读取
+cmd.DW12 = 0;
+cmd.DW13 = 0;
+cmd.DW14 = 0;
+cmd.DW15 = 0;`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* Metadata Pointer Tab */}
+      {activeTab === 'metadata' && (
+        <>
+          <section className="mb-10">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground mb-6 flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              Metadata Pointer (MPTR) 深入解析
+            </h2>
+            
+            <div className="card-paper rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-bold mb-4">核心概念</h3>
+              <div className="text-xs text-foreground/80 space-y-3">
+                <p><strong className="text-primary">Metadata Pointer (MPTR)</strong> 是 NVMe 64 字节命令中的一个 64 位字段（DW04-DW05），用于指向<strong className="text-primary">元数据缓冲区</strong>的物理地址。</p>
+                <p><strong className="text-primary">关键理解：</strong></p>
+                <ul className="ml-4 space-y-1">
+                  <li>• MPTR 是<strong className="text-primary">可选的</strong>，仅在启用端到端数据保护或需要传输元数据时使用</li>
+                  <li>• 如果不需要元数据，MPTR 应设置为 0</li>
+                  <li>• MPTR 指向的缓冲区存储与用户数据关联的元数据（如保护信息 PI）</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* When to use MPTR */}
+            <div className="card-paper rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-bold mb-4">何时使用 MPTR？何时不用？</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
+                  <h4 className="text-sm font-bold mb-3 text-green-400">需要使用 MPTR 的场景</h4>
+                  <div className="text-xs space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-green-500/10 rounded">
+                      <span>启用 PI 保护</span>
+                      <span className="font-mono">MPTR → 8 字节/LBA</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-green-500/10 rounded">
+                      <span>扩展元数据</span>
+                      <span className="font-mono">MPTR → 自定义格式</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-green-500/10 rounded">
+                      <span>混合模式</span>
+                      <span className="font-mono">MPTR → 数据 + 元数据</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
+                  <h4 className="text-sm font-bold mb-3 text-blue-400">不需要使用 MPTR 的场景</h4>
+                  <div className="text-xs space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-blue-500/10 rounded">
+                      <span>标准 IO</span>
+                      <span className="font-mono">MPTR = 0</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-blue-500/10 rounded">
+                      <span>简单读写</span>
+                      <span className="font-mono">MPTR = 0</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-blue-500/10 rounded">
+                      <span>无 PI 保护</span>
+                      <span className="font-mono">MPTR = 0</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 text-xs text-muted-foreground">
+                <p><strong className="text-foreground">实际案例：</strong>消费级 SSD：99% 场景 MPTR=0 | 企业级 SSD：可能使用 PI 保护 | ZNS SSD：通常 MPTR=0</p>
+              </div>
+            </div>
+
+            {/* MPTR vs PRP/SGL */}
+            <div className="card-paper rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-bold mb-4">MPTR 与 PRP/SGL 的关系</h3>
+              <table className="w-full text-xs">
+                <thead className="bg-surface-raised border-b border-border">
+                  <tr>
+                    <th className="text-left py-3 px-4 font-semibold">指针</th>
+                    <th className="text-left py-3 px-4 font-semibold">用途</th>
+                    <th className="text-left py-3 px-4 font-semibold">何时使用</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-blue-400">MPTR</td>
+                    <td className="py-3">指向元数据缓冲区</td>
+                    <td className="py-3 text-green-400">仅在需要元数据时</td>
+                  </tr>
+                  <tr className="border-b border-border/50">
+                    <td className="py-3 font-mono text-green-400">PRP1/PRP2</td>
+                    <td className="py-3">指向用户数据缓冲区</td>
+                    <td className="py-3">所有 IO 命令都需要</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 font-mono text-green-400">SGL</td>
+                    <td className="py-3">指向用户数据缓冲区</td>
+                    <td className="py-3">所有 IO 命令（与 PRP 二选一）</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Common misconceptions */}
+            <div className="card-paper rounded-xl p-6 mb-6 bg-orange-500/5 border-orange-500/20">
+              <h3 className="text-sm font-bold mb-4 text-orange-400">常见误区澄清</h3>
+              <div className="text-xs space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">!</span>
+                  <div>
+                    <p className="font-semibold mb-1">误区 1: "MPTR 用于传输大文件"</p>
+                    <p className="text-muted-foreground"><strong className="text-foreground">错误！</strong>MPTR 仅用于元数据，大数据传输用 PRP List 或 SGL</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">!</span>
+                  <div>
+                    <p className="font-semibold mb-1">误区 2: "MPTR 和 PRP 可以混用"</p>
+                    <p className="text-muted-foreground"><strong className="text-foreground">错误！</strong>MPTR 独立于 PRP/SGL，MPTR 总是指向单独的元数据缓冲区</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">!</span>
+                  <div>
+                    <p className="font-semibold mb-1">误区 3: "所有 SSD 都需要 MPTR"</p>
+                    <p className="text-muted-foreground"><strong className="text-foreground">错误！</strong>大多数消费级 SSD 不需要元数据，MPTR=0</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">!</span>
+                  <div>
+                    <p className="font-semibold mb-1">误区 4: "MPTR 可以是虚拟地址"</p>
+                    <p className="text-muted-foreground"><strong className="text-foreground">错误！</strong>MPTR 必须是物理地址（与 PRP/SGL 一样）</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Code examples */}
+            <div className="card-paper rounded-xl p-6 mb-6">
+              <h3 className="text-sm font-bold mb-4">实际编程示例</h3>
+              <div className="text-xs font-mono space-y-4">
+                <div className="bg-surface-raised rounded p-4">
+                  <p className="text-primary font-semibold mb-2">示例 1: 标准写命令（无元数据）</p>
+                  <pre className="overflow-x-auto text-foreground/80 whitespace-pre-wrap">
+{`// 标准写 4KB 数据，不需要元数据
+NVMe_Write_Command cmd = {0};
+cmd.CID = 1;
+cmd.NSID = 1;
+cmd.PRPr1 = 0x1000_1000;  // 用户数据物理地址
+cmd.PRPr2 = 0;            // 单页传输
+cmd.MPTR = 0;             // 无元数据，MPTR=0
+cmd.SLBA = 0x1000;        // 起始 LBA
+cmd.NLB = 7;              // 8 个逻辑块（0-based）`}
+                  </pre>
+                </div>
+                <div className="bg-surface-raised rounded p-4">
+                  <p className="text-primary font-semibold mb-2">示例 2: 写命令带 PI 保护</p>
+                  <pre className="overflow-x-auto text-foreground/80 whitespace-pre-wrap">
+{`// 写 4KB 数据 + 8 字节 PI 保护信息
+NVMe_Write_Command cmd = {0};
+cmd.CID = 2;
+cmd.NSID = 1;
+cmd.PRPr1 = 0x1000_1000;  // 用户数据物理地址（4KB）
+cmd.PRPr2 = 0;
+cmd.MPTR = 0x1000_2000;   // 元数据物理地址（8 字节 PI）
+cmd.SLBA = 0x1000;
+cmd.NLB = 7;
+// SSD 会将 4KB 数据 + 8 字节 PI 一起写入`}
+                  </pre>
+                </div>
+                <div className="bg-surface-raised rounded p-4">
+                  <p className="text-primary font-semibold mb-2">示例 3: 读命令获取 PI 保护</p>
+                  <pre className="overflow-x-auto text-foreground/80 whitespace-pre-wrap">
+{`// 读取 4KB 数据 + 8 字节 PI 保护信息
+NVMe_Read_Command cmd = {0};
+cmd.CID = 3;
+cmd.NSID = 1;
+cmd.PRPr1 = 0x1000_3000;  // 用户数据缓冲区
+cmd.PRPr2 = 0;
+cmd.MPTR = 0x1000_4000;   // 元数据缓冲区（用于接收 PI）
+cmd.SLBA = 0x1000;
+cmd.NLB = 7;
+// SSD 读取后：数据 → 0x1000_3000, PI → 0x1000_4000`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+
+            {/* MPTR position in SQE */}
+            <div className="card-paper rounded-xl p-6">
+              <h3 className="text-sm font-bold mb-4">MPTR 在 64 字节 SQE 中的位置</h3>
+              <div className="grid grid-cols-8 gap-1 text-center text-xs font-mono mb-4">
+                {Array.from({ length: 64 }).map((_, i) => (
+                  <div key={i} className={cn(
+                    'py-2 rounded border',
+                    i < 16 ? 'bg-primary/10 border-primary/30 text-primary' :
+                    i >= 16 && i < 24 ? 'bg-blue-500/10 border-blue-500/30 text-blue-400 font-bold' :
+                    i >= 24 && i < 40 ? 'bg-green-500/10 border-green-500/30 text-green-400' :
+                    'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                  )}>
+                    {i}
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-4 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-primary/10 border border-primary/30 rounded"></div>
+                  <span>DW00-DW03: 基础命令信息</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-blue-500/10 border border-blue-500/30 rounded"></div>
+                  <span className="font-bold">DW04-DW05: MPTR（元数据指针）</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-500/10 border border-green-500/30 rounded"></div>
+                  <span>DW06-DW09: PRP/SGL 指针</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-orange-500/10 border border-orange-500/30 rounded"></div>
+                  <span>DW10-DW15: 命令特定字段</span>
+                </div>
+              </div>
             </div>
           </section>
         </>
